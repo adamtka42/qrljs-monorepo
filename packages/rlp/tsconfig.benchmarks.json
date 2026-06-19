@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["dom"],
+    "sourceMap": false,
+    "declaration": true,
+    "esModuleInterop": true,
+    "module": "esnext"
+  },
+  "include": ["benchmarks/**.ts"]
+}
