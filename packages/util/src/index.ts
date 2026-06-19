@@ -37,6 +37,11 @@ export * from './bal/validation.ts'
 export * from './address.ts'
 
 /**
+ * QRL primitive helpers
+ */
+export * as qrl from './qrl/index.ts'
+
+/**
  * DB type
  */
 export * from './db.ts'

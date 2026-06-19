@@ -1,0 +1,3 @@
+export const QRL_ADDRESS_BYTES = 64
+export const QRL_ADDRESS_HEX_LENGTH = QRL_ADDRESS_BYTES * 2
+export const QRL_ADDRESS_PREFIX = 'Q'
