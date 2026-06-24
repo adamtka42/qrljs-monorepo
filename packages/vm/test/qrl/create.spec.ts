@@ -1,3 +1,4 @@
+import { qrl as evmQrl } from '@ethereumjs/evm'
 import { qrl as stateQrl } from '@ethereumjs/statemanager'
 import { qrl as txQrl } from '@ethereumjs/tx'
 import { qrl as utilQrl } from '@ethereumjs/util'
@@ -15,7 +16,7 @@ function createTx(data: Partial<txQrl.QRLDynamicFeeTxData> = {}): txQrl.QRLDynam
     nonce: 0n,
     gasTipCap: 0n,
     gasFeeCap: 0n,
-    gasLimit: 100n,
+    gasLimit: 80000n,
     value: 0n,
     data: new Uint8Array([0x60, 0x00, 0x60, 0x00, 0x53, 0x60, 0x01, 0x60, 0x00, 0xf3]),
     ...data,
@@ -89,5 +90,47 @@ describe('runQRLTx contract creation', () => {
     assert.strictEqual(result.status, 0)
     assert.deepEqual(await stateManager.getCode(createdAddress), new Uint8Array())
     assert.strictEqual(await stateManager.getNonce(sender), 1n)
+  })
+
+  it('rejects top-level contract creation with invalid deployed code', async () => {
+    const stateManager = new stateQrl.QRLStateManager()
+    const sender = address(1)
+    await stateManager.setBalance(sender, 1000n)
+    const createdAddress = qrl.createQRLContractAddress(sender, 0n)
+
+    const result = await qrl.runQRLTx({
+      tx: createTx({
+        data: new Uint8Array([0x60, 0xef, 0x60, 0x00, 0x53, 0x60, 0x01, 0x60, 0x00, 0xf3]),
+      }),
+      stateManager,
+      sender,
+      context: { chainId: 1n },
+    })
+
+    assert.strictEqual(result.status, 0)
+    assert.deepEqual(await stateManager.getCode(createdAddress), new Uint8Array())
+    assert.strictEqual(await stateManager.getNonce(sender), 1n)
+  })
+
+  it('rejects top-level contract creation when init code exceeds the QRL limit', async () => {
+    const stateManager = new stateQrl.QRLStateManager()
+    const sender = address(1)
+    await stateManager.setBalance(sender, 1000n)
+    const createdAddress = qrl.createQRLContractAddress(sender, 0n)
+
+    await assertRejects(
+      () =>
+        qrl.runQRLTx({
+          tx: createTx({ data: new Uint8Array(evmQrl.QRL_MAX_INIT_CODE_SIZE + 1) }),
+          stateManager,
+          sender,
+          context: { chainId: 1n },
+        }),
+      'INIT_CODE_SIZE_EXCEEDED',
+    )
+
+    assert.deepEqual(await stateManager.getCode(createdAddress), new Uint8Array())
+    assert.strictEqual(await stateManager.getNonce(sender), 0n)
+    assert.strictEqual(await stateManager.getBalance(sender), 1000n)
   })
 })

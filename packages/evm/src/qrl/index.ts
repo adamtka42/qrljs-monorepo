@@ -1,5 +1,6 @@
 export * from './errors.ts'
 export * from './evm.ts'
+export * from './gas.ts'
 export * from './interpreter.ts'
 export * from './memory.ts'
 export * from './message.ts'

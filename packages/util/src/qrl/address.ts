@@ -1,14 +1,18 @@
-import { shake256 } from '@noble/hashes/sha3.js'
+import { RLP } from '@ethereumjs/rlp'
+import { keccak_512, shake256 } from '@noble/hashes/sha3.js'
 
 import { bytesToHex, equalsBytes, hexToBytes } from '../bytes.ts'
 import { EthereumJSErrorWithoutCode } from '../errors.ts'
 
 import { QRL_ADDRESS_BYTES, QRL_ADDRESS_HEX_LENGTH, QRL_ADDRESS_PREFIX } from './constants.ts'
 
+import type { Input } from '@ethereumjs/rlp'
 import type { PrefixedHexString } from '../types.ts'
 
 const QRL_ADDRESS_RE = new RegExp(`^${QRL_ADDRESS_PREFIX}[0-9a-fA-F]{${QRL_ADDRESS_HEX_LENGTH}}$`)
 const QRL_HEX_RE = new RegExp(`^0x[0-9a-fA-F]{${QRL_ADDRESS_HEX_LENGTH}}$`)
+const QRL_CONTRACT_ADDRESS_DOMAIN = new TextEncoder().encode('QRL-ADDR-v1')
+const UINT64_MAX = 2n ** 64n - 1n
 
 /**
  * Handling and validating QRL 64-byte addresses.
@@ -128,6 +132,41 @@ export function qrlAddressFromBytes(bytes: Uint8Array): QRLAddress {
 
 export function qrlAddressFromHex(hex: string): QRLAddress {
   return QRLAddress.fromHex(hex)
+}
+
+export function createQRLContractAddress(sender: QRLAddress, nonce: bigint): QRLAddress {
+  if (nonce < 0n || nonce > UINT64_MAX) {
+    throw EthereumJSErrorWithoutCode(`Invalid QRL contract nonce=${nonce.toString()}`)
+  }
+  const encoded = RLP.encode([sender.toBytes(), nonce] as Input)
+  return QRLAddress.fromBytes(qrlContractAddressHash(encoded))
+}
+
+export function createQRLContractAddress2(
+  sender: QRLAddress,
+  salt64: Uint8Array,
+  initCodeHash: Uint8Array,
+): QRLAddress {
+  if (salt64.length !== QRL_ADDRESS_BYTES) {
+    throw EthereumJSErrorWithoutCode(`Invalid QRL CREATE2 salt length=${salt64.length}`)
+  }
+  if (initCodeHash.length !== 32) {
+    throw EthereumJSErrorWithoutCode(
+      `Invalid QRL CREATE2 init code hash length=${initCodeHash.length}`,
+    )
+  }
+  return QRLAddress.fromBytes(
+    qrlContractAddressHash(new Uint8Array([0xff]), sender.toBytes(), salt64, initCodeHash),
+  )
+}
+
+function qrlContractAddressHash(...parts: Uint8Array[]): Uint8Array {
+  const hasher = keccak_512.create()
+  hasher.update(QRL_CONTRACT_ADDRESS_DOMAIN)
+  for (const part of parts) {
+    hasher.update(part)
+  }
+  return hasher.digest()
 }
 
 function toQRLChecksumAddress(bytes: Uint8Array): string {

@@ -32,6 +32,14 @@ export async function runQRLTx(options: QRLRunTxOptions): Promise<QRLRunTxResult
     await validateNonce(stateManager, sender, tx.nonce)
   }
 
+  validateQrlInitCodeSize(tx)
+
+  const intrinsicGas = qrlIntrinsicGas(tx)
+  if (tx.gasLimit < intrinsicGas) {
+    throw qrlRunTxError('INTRINSIC_GAS_TOO_LOW', 'QRL transaction gas limit is below intrinsic gas')
+  }
+  const executionGasLimit = tx.gasLimit - intrinsicGas
+
   const maxGasCost = tx.gasLimit * tx.gasFeeCap
   const upfrontCost = maxGasCost + tx.value
   if (options.skipBalance !== true && (await stateManager.getBalance(sender)) < upfrontCost) {
@@ -45,6 +53,9 @@ export async function runQRLTx(options: QRLRunTxOptions): Promise<QRLRunTxResult
     createdAddress = createQRLContractAddress(sender, createNonce)
     await ensureNoContractCollision(stateManager, createdAddress)
   }
+
+  const warmedAccounts = qrlTxWarmedAccounts(tx, sender, context)
+  const warmedStorage = qrlTxWarmedStorage(tx)
 
   await stateManager.subBalance(sender, tx.gasLimit * effectiveGasPrice)
   await stateManager.incrementNonce(sender)
@@ -61,16 +72,28 @@ export async function runQRLTx(options: QRLRunTxOptions): Promise<QRLRunTxResult
         origin: sender,
         code: tx.data,
         value: tx.value,
-        gasLimit: tx.gasLimit,
+        gasLimit: executionGasLimit,
+        warmedAccounts,
+        warmedStorage,
         context: {
           coinbase: context.coinbase,
           blockNumber: context.blockNumber,
           timestamp: context.timestamp,
           gasLimit: context.gasLimit,
+          chainId: context.chainId,
+          baseFee: context.baseFee,
+          gasPrice: effectiveGasPrice,
         },
       })
       if (execution.exceptionError === undefined) {
-        await stateManager.putCode(createdAddress!, execution.returnValue)
+        if (!isValidDeployedCode(execution.returnValue)) {
+          execution = {
+            ...execution,
+            exceptionError: new evmQrl.QRLVMError('QRL invalid deployed code'),
+          }
+        } else {
+          await stateManager.putCode(createdAddress!, execution.returnValue)
+        }
       }
     } else {
       await transferValue(stateManager, sender, tx.to!, tx.value)
@@ -80,26 +103,31 @@ export async function runQRLTx(options: QRLRunTxOptions): Promise<QRLRunTxResult
         origin: sender,
         data: tx.data,
         value: tx.value,
-        gasLimit: tx.gasLimit,
+        gasLimit: executionGasLimit,
+        warmedAccounts,
+        warmedStorage,
         context: {
           coinbase: context.coinbase,
           blockNumber: context.blockNumber,
           timestamp: context.timestamp,
           gasLimit: context.gasLimit,
+          chainId: context.chainId,
+          baseFee: context.baseFee,
+          gasPrice: effectiveGasPrice,
         },
       })
     }
 
     if (execution.exceptionError !== undefined) {
       await stateManager.revert()
-      await refundRemainingGas(stateManager, sender, execution, effectiveGasPrice)
-      return buildResult(tx, sender, effectiveGasPrice, execution, 0, createdAddress)
+      await refundRemainingGas(stateManager, sender, execution, intrinsicGas, effectiveGasPrice)
+      return buildResult(tx, sender, effectiveGasPrice, execution, intrinsicGas, 0, createdAddress)
     }
 
-    await refundRemainingGas(stateManager, sender, execution, effectiveGasPrice)
+    await refundRemainingGas(stateManager, sender, execution, intrinsicGas, effectiveGasPrice)
     await stateManager.commit()
 
-    return buildResult(tx, sender, effectiveGasPrice, execution, 1, createdAddress)
+    return buildResult(tx, sender, effectiveGasPrice, execution, intrinsicGas, 1, createdAddress)
   } catch (error) {
     await stateManager.revert()
     throw error
@@ -185,12 +213,68 @@ async function refundRemainingGas(
   stateManager: stateQrl.QRLStateManager,
   sender: qrl.QRLAddress,
   execution: evmQrl.QRLExecutionResult,
+  intrinsicGas: bigint,
   effectiveGasPrice: bigint,
 ): Promise<void> {
-  const refund = execution.gasRemaining * effectiveGasPrice
+  const refundableGas = execution.gasRemaining + cappedGasRefund(execution, intrinsicGas)
+  const refund = refundableGas * effectiveGasPrice
   if (refund > 0n) {
     await stateManager.addBalance(sender, refund)
   }
+}
+
+function qrlTxWarmedAccounts(
+  tx: txQrl.QRLDynamicFeeTransaction,
+  sender: qrl.QRLAddress,
+  context: NormalizedQRLRunTxContext,
+): qrl.QRLAddress[] {
+  const accounts = [sender, context.coinbase]
+  if (tx.to !== undefined) {
+    accounts.push(tx.to)
+  }
+  return accounts
+}
+
+function qrlTxWarmedStorage(tx: txQrl.QRLDynamicFeeTransaction): evmQrl.QRLWarmStorageAccess[] {
+  return tx.accessList.flatMap((tuple) =>
+    tuple.storageKeys.map((key) => ({
+      address: tuple.address,
+      key,
+    })),
+  )
+}
+
+function validateQrlInitCodeSize(tx: txQrl.QRLDynamicFeeTransaction): void {
+  if (tx.isContractCreation() && tx.data.length > evmQrl.QRL_MAX_INIT_CODE_SIZE) {
+    throw qrlRunTxError('INIT_CODE_SIZE_EXCEEDED', 'QRL init code size exceeds limit')
+  }
+}
+
+export function qrlIntrinsicGas(tx: txQrl.QRLDynamicFeeTransaction): bigint {
+  let gas = tx.isContractCreation() ? 53000n : 21000n
+  for (const byte of tx.data) {
+    gas += byte === 0 ? 4n : 16n
+  }
+  if (tx.isContractCreation()) {
+    gas += evmQrl.qrlCreateInitCodeGas(tx.data.length)
+  }
+  for (const tuple of tx.accessList) {
+    gas += 2400n + BigInt(tuple.storageKeys.length) * 1900n
+  }
+  return gas
+}
+
+function isValidDeployedCode(code: Uint8Array): boolean {
+  return code.length <= evmQrl.QRL_MAX_CODE_SIZE && code[0] !== 0xef
+}
+
+function chargedGasUsed(execution: evmQrl.QRLExecutionResult, intrinsicGas: bigint): bigint {
+  return intrinsicGas + execution.gasUsed - cappedGasRefund(execution, intrinsicGas)
+}
+
+function cappedGasRefund(execution: evmQrl.QRLExecutionResult, intrinsicGas: bigint): bigint {
+  const maxRefund = (intrinsicGas + execution.gasUsed) / 5n
+  return execution.gasRefund < maxRefund ? execution.gasRefund : maxRefund
 }
 
 async function ensureNoContractCollision(
@@ -210,6 +294,7 @@ function buildResult(
   sender: qrl.QRLAddress,
   effectiveGasPrice: bigint,
   execution: evmQrl.QRLExecutionResult,
+  intrinsicGas: bigint,
   status: 0 | 1,
   createdAddress?: qrl.QRLAddress,
 ): QRLRunTxResult {
@@ -219,11 +304,21 @@ function buildResult(
     to: tx.to,
     createdAddress,
     returnValue: new Uint8Array(execution.returnValue),
-    gasUsed: execution.gasUsed,
-    gasRemaining: execution.gasRemaining,
-    totalGasSpent: execution.gasUsed * effectiveGasPrice,
+    gasUsed: chargedGasUsed(execution, intrinsicGas),
+    gasRemaining: execution.gasRemaining + cappedGasRefund(execution, intrinsicGas),
+    gasRefund: execution.gasRefund,
+    totalGasSpent: chargedGasUsed(execution, intrinsicGas) * effectiveGasPrice,
     effectiveGasPrice,
     executionError: execution.exceptionError,
     status,
+    logs: (execution.logs ?? []).map(copyExecutionLog),
+  }
+}
+
+function copyExecutionLog(log: evmQrl.QRLExecutionLog): evmQrl.QRLExecutionLog {
+  return {
+    address: qrl.QRLAddress.fromBytes(log.address.toBytes()),
+    topics: log.topics.map((topic) => new Uint8Array(topic)),
+    data: new Uint8Array(log.data),
   }
 }

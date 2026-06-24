@@ -44,4 +44,44 @@ describe('QRLUint512', () => {
       qrl.QRL_WORD_MAX,
     )
   })
+
+  it('handles signed arithmetic and comparisons', () => {
+    const minusTwo = qrl.QRLUint512.fromBigInt(-2n)
+    const seven = qrl.QRLUint512.fromBigInt(7n)
+    const three = qrl.QRLUint512.fromBigInt(3n)
+
+    assert.strictEqual(minusTwo.sdiv(three).toBigInt(), 0n)
+    assert.strictEqual(qrl.QRLUint512.fromBigInt(-7n).sdiv(three).toBigInt(), qrl.QRL_WORD_MAX - 1n)
+    assert.strictEqual(qrl.QRLUint512.fromBigInt(-7n).smod(three).toBigInt(), qrl.QRL_WORD_MAX - 0n)
+    assert.strictEqual(minusTwo.slt(three).toBigInt(), 1n)
+    assert.strictEqual(three.sgt(minusTwo).toBigInt(), 1n)
+    assert.strictEqual(seven.smod(qrl.QRLUint512.zero()).toBigInt(), 0n)
+  })
+
+  it('handles modular arithmetic, exponentiation, and sign extension', () => {
+    assert.strictEqual(
+      qrl.QRLUint512.fromBigInt(7n)
+        .addmod(qrl.QRLUint512.fromBigInt(8n), qrl.QRLUint512.fromBigInt(10n))
+        .toBigInt(),
+      5n,
+    )
+    assert.strictEqual(
+      qrl.QRLUint512.fromBigInt(7n)
+        .mulmod(qrl.QRLUint512.fromBigInt(8n), qrl.QRLUint512.fromBigInt(10n))
+        .toBigInt(),
+      6n,
+    )
+    assert.strictEqual(
+      qrl.QRLUint512.fromBigInt(2n).exp(qrl.QRLUint512.fromBigInt(10n)).toBigInt(),
+      1024n,
+    )
+    assert.strictEqual(
+      qrl.QRLUint512.fromBigInt(2n).exp(qrl.QRLUint512.fromBigInt(512n)).toBigInt(),
+      0n,
+    )
+    assert.strictEqual(
+      qrl.QRLUint512.fromBigInt(0x80n).signExtend(qrl.QRLUint512.zero()).toBigInt(),
+      qrl.QRL_WORD_MAX - 0x7fn,
+    )
+  })
 })

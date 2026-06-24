@@ -1,7 +1,7 @@
 import { qrl as stateQrl } from '@ethereumjs/statemanager'
 import type { qrl } from '@ethereumjs/util'
 
-import { QRLInterpreter } from './interpreter.ts'
+import { QRLInterpreter, type QRLWarmStorageAccess } from './interpreter.ts'
 import { type QRLExecutionContext, QRLMessage, defaultQRLExecutionContext } from './message.ts'
 import { type QRLExecutionResult } from './result.ts'
 
@@ -13,6 +13,7 @@ export interface QRLEVMOptions {
 export interface QRLRunCodeOptions {
   code: Uint8Array
   data?: Uint8Array
+  returnData?: Uint8Array
   caller?: qrl.QRLAddress
   to?: qrl.QRLAddress
   origin?: qrl.QRLAddress
@@ -20,6 +21,8 @@ export interface QRLRunCodeOptions {
   gasLimit?: bigint
   isStatic?: boolean
   context?: Partial<QRLExecutionContext>
+  warmedAccounts?: qrl.QRLAddress[]
+  warmedStorage?: QRLWarmStorageAccess[]
 }
 
 export interface QRLRunCallOptions {
@@ -28,10 +31,13 @@ export interface QRLRunCallOptions {
   origin?: qrl.QRLAddress
   data?: Uint8Array
   code?: Uint8Array
+  returnData?: Uint8Array
   value?: bigint
   gasLimit?: bigint
   isStatic?: boolean
   context?: Partial<QRLExecutionContext>
+  warmedAccounts?: qrl.QRLAddress[]
+  warmedStorage?: QRLWarmStorageAccess[]
 }
 
 export class QRLEVM {
@@ -55,10 +61,13 @@ export class QRLEVM {
       origin: options.origin,
       data: options.data,
       code: options.code,
+      returnData: options.returnData,
       value: options.value,
       gasLimit: options.gasLimit,
       isStatic: options.isStatic,
       context: options.context,
+      warmedAccounts: options.warmedAccounts,
+      warmedStorage: options.warmedStorage,
     })
   }
 
@@ -85,6 +94,8 @@ export class QRLEVM {
     const interpreter = new QRLInterpreter({
       stateManager: this.stateManager,
       context,
+      warmedAccounts: options.warmedAccounts,
+      warmedStorage: options.warmedStorage,
     })
     return interpreter.run(
       new QRLMessage({
@@ -93,6 +104,7 @@ export class QRLEVM {
         value: options.value,
         data: options.data,
         code: options.code,
+        returnData: options.returnData,
         gasLimit: options.gasLimit,
         isStatic: options.isStatic,
       }),

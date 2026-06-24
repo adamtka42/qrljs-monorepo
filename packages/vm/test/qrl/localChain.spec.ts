@@ -14,7 +14,7 @@ function tx(nonce = 0n): txQrl.QRLDynamicFeeTransaction {
     nonce,
     gasTipCap: 0n,
     gasFeeCap: 0n,
-    gasLimit: 100n,
+    gasLimit: 50000n,
     to: address(2),
   })
 }
@@ -72,5 +72,34 @@ describe('QRLLocalChain', () => {
     assert.strictEqual(bytesToHex(block.header.parentHash), bytesToHex(genesisHash))
     assert.strictEqual(block.transactions.length, 0)
     assert.strictEqual(block.receipts.length, 0)
+  })
+
+  it('uses refunded gas in automined QRL receipts', async () => {
+    const chain = new qrl.QRLLocalChain({ context: { chainId: 1n, gasLimit: 100000n } })
+    const sender = address(1)
+    const receiver = address(2)
+    const key = new Uint8Array(32)
+    key[31] = 1
+    const value = new Uint8Array(64)
+    value[63] = 0x2a
+    await chain.stateManager.setBalance(sender, 100000n)
+    await chain.stateManager.putStorage(receiver, key, value)
+    await chain.stateManager.putCode(receiver, new Uint8Array([0x5f, 0x60, 0x01, 0x55, 0x00]))
+
+    const result = await chain.runTx({
+      tx: new txQrl.QRLDynamicFeeTransaction({
+        chainId: 1n,
+        nonce: 0n,
+        gasTipCap: 0n,
+        gasFeeCap: 1n,
+        gasLimit: 50000n,
+        to: receiver,
+      }),
+      sender,
+    })
+
+    assert.strictEqual(result.runTxResult.gasUsed, 21205n)
+    assert.strictEqual(result.receipt?.gasUsed, 21205n)
+    assert.strictEqual(result.receipt?.cumulativeGasUsed, 21205n)
   })
 })

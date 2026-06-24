@@ -32,7 +32,7 @@ describe('QRLLocalProvider', () => {
         {
           from: sender.toString(),
           to: receiver.toString(),
-          gas: '0x64',
+          gas: '0xc350',
           maxFeePerGas: '0x0',
           maxPriorityFeePerGas: '0x0',
           value: '0x2a',
@@ -119,7 +119,7 @@ describe('QRLLocalProvider', () => {
     assert.strictEqual(
       await provider.request({
         method: 'qrl_call',
-        params: [{ from: sender.toString(), to: contract.toString(), gasLimit: '0x64' }],
+        params: [{ from: sender.toString(), to: contract.toString(), gasLimit: '0xc350' }],
       }),
       `0x${'00'.repeat(63)}2a`,
     )
@@ -146,7 +146,7 @@ describe('QRLLocalProvider', () => {
     await expect(
       provider.request({
         method: 'qrl_call',
-        params: [{ from: sender.toString(), to: contract.toString(), gasLimit: '0x64' }],
+        params: [{ from: sender.toString(), to: contract.toString(), gasLimit: '0xc350' }],
       }),
     ).rejects.toMatchObject({ code: -32000 })
 

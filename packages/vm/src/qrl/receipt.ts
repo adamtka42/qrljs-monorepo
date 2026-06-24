@@ -27,6 +27,17 @@ export function createQRLReceiptFromRunTxResult(
     gasUsed: result.gasUsed,
     cumulativeGasUsed: options.cumulativeGasUsed ?? result.gasUsed,
     effectiveGasPrice: result.effectiveGasPrice,
-    logs: options.logs ?? [],
+    logs: options.logs ?? logsFromResult(result),
   })
+}
+
+function logsFromResult(result: QRLRunTxResult): blockQrl.QRLLog[] {
+  return (result.logs ?? []).map(
+    (log) =>
+      new blockQrl.QRLLog({
+        address: log.address,
+        topics: log.topics.map((topic) => new Uint8Array(topic)),
+        data: new Uint8Array(log.data),
+      }),
+  )
 }

@@ -9,6 +9,10 @@ export interface QRLExecutionContext {
   blockNumber: bigint
   timestamp: bigint
   gasLimit: bigint
+  chainId: bigint
+  baseFee: bigint
+  prevRandao: bigint
+  blockHashes: ReadonlyMap<bigint, Uint8Array>
 }
 
 export interface QRLMessageData {
@@ -17,7 +21,9 @@ export interface QRLMessageData {
   value?: bigint
   data?: Uint8Array
   code?: Uint8Array
+  returnData?: Uint8Array
   gasLimit?: bigint
+  depth?: number
   isStatic?: boolean
 }
 
@@ -27,7 +33,9 @@ export class QRLMessage {
   public readonly value: bigint
   public readonly data: Uint8Array
   public readonly code: Uint8Array
+  public readonly returnData: Uint8Array
   public readonly gasLimit: bigint
+  public readonly depth: number
   public readonly isStatic: boolean
 
   public constructor(data: QRLMessageData) {
@@ -36,7 +44,9 @@ export class QRLMessage {
     this.value = data.value ?? 0n
     this.data = new Uint8Array(data.data ?? new Uint8Array(0))
     this.code = new Uint8Array(data.code ?? new Uint8Array(0))
+    this.returnData = new Uint8Array(data.returnData ?? new Uint8Array(0))
     this.gasLimit = data.gasLimit ?? 0xffffffffffn
+    this.depth = data.depth ?? 0
     this.isStatic = data.isStatic ?? false
   }
 }
@@ -52,5 +62,9 @@ export function defaultQRLExecutionContext(): QRLExecutionContext {
     blockNumber: 0n,
     timestamp: 0n,
     gasLimit: 0n,
+    chainId: 1n,
+    baseFee: 0n,
+    prevRandao: 0n,
+    blockHashes: new Map(),
   }
 }

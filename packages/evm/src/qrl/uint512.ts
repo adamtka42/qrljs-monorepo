@@ -4,6 +4,7 @@ export const QRL_WORD_BITS = 512n
 export const QRL_WORD_BYTES = 64
 export const QRL_WORD_MOD = 1n << QRL_WORD_BITS
 export const QRL_WORD_MAX = QRL_WORD_MOD - 1n
+const QRL_SIGN_BIT = 1n << (QRL_WORD_BITS - 1n)
 
 export class QRLUint512 {
   private readonly value: bigint
@@ -71,12 +72,56 @@ export class QRLUint512 {
     return other.isZero() ? QRLUint512.zero() : new QRLUint512(this.value % other.value)
   }
 
+  public sdiv(other: QRLUint512): QRLUint512 {
+    const dividend = this.toSignedBigInt()
+    const divisor = other.toSignedBigInt()
+    if (divisor === 0n) {
+      return QRLUint512.zero()
+    }
+    const quotient = abs(dividend) / abs(divisor)
+    return QRLUint512.fromBigInt(dividend < 0n !== divisor < 0n ? -quotient : quotient)
+  }
+
+  public smod(other: QRLUint512): QRLUint512 {
+    const dividend = this.toSignedBigInt()
+    const divisor = other.toSignedBigInt()
+    if (divisor === 0n) {
+      return QRLUint512.zero()
+    }
+    const remainder = abs(dividend) % abs(divisor)
+    return QRLUint512.fromBigInt(dividend < 0n ? -remainder : remainder)
+  }
+
+  public addmod(addend: QRLUint512, modulo: QRLUint512): QRLUint512 {
+    return modulo.isZero()
+      ? QRLUint512.zero()
+      : QRLUint512.fromBigInt((this.value + addend.value) % modulo.value)
+  }
+
+  public mulmod(multiplier: QRLUint512, modulo: QRLUint512): QRLUint512 {
+    return modulo.isZero()
+      ? QRLUint512.zero()
+      : QRLUint512.fromBigInt((this.value * multiplier.value) % modulo.value)
+  }
+
+  public exp(exponent: QRLUint512): QRLUint512 {
+    return new QRLUint512(modularPow(this.value, exponent.value, QRL_WORD_MOD))
+  }
+
   public lt(other: QRLUint512): QRLUint512 {
     return this.value < other.value ? QRLUint512.one() : QRLUint512.zero()
   }
 
   public gt(other: QRLUint512): QRLUint512 {
     return this.value > other.value ? QRLUint512.one() : QRLUint512.zero()
+  }
+
+  public slt(other: QRLUint512): QRLUint512 {
+    return this.toSignedBigInt() < other.toSignedBigInt() ? QRLUint512.one() : QRLUint512.zero()
+  }
+
+  public sgt(other: QRLUint512): QRLUint512 {
+    return this.toSignedBigInt() > other.toSignedBigInt() ? QRLUint512.one() : QRLUint512.zero()
   }
 
   public eq(other: QRLUint512): QRLUint512 {
@@ -88,6 +133,18 @@ export class QRLUint512 {
       return QRLUint512.zero()
     }
     return QRLUint512.fromBigInt(BigInt(this.toBytes64()[Number(index.value)]))
+  }
+
+  public signExtend(byteIndex: QRLUint512): QRLUint512 {
+    if (byteIndex.value >= BigInt(QRL_WORD_BYTES)) {
+      return this
+    }
+    const bitIndex = (byteIndex.value + 1n) * 8n - 1n
+    const signBit = 1n << bitIndex
+    const mask = signBit - 1n
+    return (this.value & signBit) !== 0n
+      ? new QRLUint512(this.value | (QRL_WORD_MAX ^ mask))
+      : new QRLUint512(this.value & mask)
   }
 
   public and(other: QRLUint512): QRLUint512 {
@@ -121,12 +178,37 @@ export class QRLUint512 {
   }
 
   public sar(bits: QRLUint512): QRLUint512 {
-    const signed = this.value >= 1n << 511n ? this.value - QRL_WORD_MOD : this.value
+    const signed = this.toSignedBigInt()
     if (bits.value >= QRL_WORD_BITS) {
       return signed < 0n ? new QRLUint512(QRL_WORD_MAX) : QRLUint512.zero()
     }
     return new QRLUint512(signed >> bits.value)
   }
+
+  private toSignedBigInt(): bigint {
+    return this.value >= QRL_SIGN_BIT ? this.value - QRL_WORD_MOD : this.value
+  }
+}
+
+function abs(value: bigint): bigint {
+  return value < 0n ? -value : value
+}
+
+function modularPow(base: bigint, exponent: bigint, modulo: bigint): bigint {
+  if (modulo === 1n) {
+    return 0n
+  }
+  let result = 1n
+  let currentBase = base % modulo
+  let currentExponent = exponent
+  while (currentExponent > 0n) {
+    if ((currentExponent & 1n) === 1n) {
+      result = (result * currentBase) % modulo
+    }
+    currentExponent >>= 1n
+    currentBase = (currentBase * currentBase) % modulo
+  }
+  return result
 }
 
 function moduloWord(value: bigint): bigint {

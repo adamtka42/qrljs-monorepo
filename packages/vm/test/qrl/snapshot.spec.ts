@@ -14,7 +14,7 @@ function tx(nonce = 0n): txQrl.QRLDynamicFeeTransaction {
     nonce,
     gasTipCap: 0n,
     gasFeeCap: 0n,
-    gasLimit: 100n,
+    gasLimit: 50000n,
     to: address(2),
   })
 }
