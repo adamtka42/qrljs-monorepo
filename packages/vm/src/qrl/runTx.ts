@@ -39,21 +39,24 @@ export async function runQRLTx(options: QRLRunTxOptions): Promise<QRLRunTxResult
   }
 
   const evm = options.evm ?? new evmQrl.QRLEVM({ stateManager })
+  let createdAddress: qrl.QRLAddress | undefined
+  if (tx.isContractCreation()) {
+    const createNonce = await stateManager.getNonce(sender)
+    createdAddress = createQRLContractAddress(sender, createNonce)
+    await ensureNoContractCollision(stateManager, createdAddress)
+  }
+
+  await stateManager.subBalance(sender, tx.gasLimit * effectiveGasPrice)
+  await stateManager.incrementNonce(sender)
+
   await stateManager.checkpoint()
   try {
-    await stateManager.subBalance(sender, tx.gasLimit * effectiveGasPrice)
-
     let execution: evmQrl.QRLExecutionResult
-    let createdAddress: qrl.QRLAddress | undefined
 
     if (tx.isContractCreation()) {
-      const createNonce = await stateManager.getNonce(sender)
-      createdAddress = createQRLContractAddress(sender, createNonce)
-      await ensureNoContractCollision(stateManager, createdAddress)
-      await stateManager.incrementNonce(sender)
-      await transferValue(stateManager, sender, createdAddress, tx.value)
+      await transferValue(stateManager, sender, createdAddress!, tx.value)
       execution = await evm.runCode({
-        to: createdAddress,
+        to: createdAddress!,
         caller: sender,
         origin: sender,
         code: tx.data,
@@ -67,10 +70,9 @@ export async function runQRLTx(options: QRLRunTxOptions): Promise<QRLRunTxResult
         },
       })
       if (execution.exceptionError === undefined) {
-        await stateManager.putCode(createdAddress, execution.returnValue)
+        await stateManager.putCode(createdAddress!, execution.returnValue)
       }
     } else {
-      await stateManager.incrementNonce(sender)
       await transferValue(stateManager, sender, tx.to!, tx.value)
       execution = await evm.runCall({
         to: tx.to!,
@@ -90,13 +92,11 @@ export async function runQRLTx(options: QRLRunTxOptions): Promise<QRLRunTxResult
 
     if (execution.exceptionError !== undefined) {
       await stateManager.revert()
+      await refundRemainingGas(stateManager, sender, execution, effectiveGasPrice)
       return buildResult(tx, sender, effectiveGasPrice, execution, 0, createdAddress)
     }
 
-    const refund = execution.gasRemaining * effectiveGasPrice
-    if (refund > 0n) {
-      await stateManager.addBalance(sender, refund)
-    }
+    await refundRemainingGas(stateManager, sender, execution, effectiveGasPrice)
     await stateManager.commit()
 
     return buildResult(tx, sender, effectiveGasPrice, execution, 1, createdAddress)
@@ -179,6 +179,18 @@ async function transferValue(
   }
   await stateManager.subBalance(from, value)
   await stateManager.addBalance(to, value)
+}
+
+async function refundRemainingGas(
+  stateManager: stateQrl.QRLStateManager,
+  sender: qrl.QRLAddress,
+  execution: evmQrl.QRLExecutionResult,
+  effectiveGasPrice: bigint,
+): Promise<void> {
+  const refund = execution.gasRemaining * effectiveGasPrice
+  if (refund > 0n) {
+    await stateManager.addBalance(sender, refund)
+  }
 }
 
 async function ensureNoContractCollision(

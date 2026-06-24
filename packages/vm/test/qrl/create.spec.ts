@@ -88,6 +88,6 @@ describe('runQRLTx contract creation', () => {
 
     assert.strictEqual(result.status, 0)
     assert.deepEqual(await stateManager.getCode(createdAddress), new Uint8Array())
-    assert.strictEqual(await stateManager.getNonce(sender), 0n)
+    assert.strictEqual(await stateManager.getNonce(sender), 1n)
   })
 })

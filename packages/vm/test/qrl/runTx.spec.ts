@@ -153,7 +153,7 @@ describe('runQRLTx', () => {
 
     assert.strictEqual(result.status, 0)
     assert.instanceOf(result.executionError, evmQrl.QRLVMRevert)
-    assert.strictEqual(await stateManager.getNonce(sender), 0n)
+    assert.strictEqual(await stateManager.getNonce(sender), 1n)
     assert.strictEqual(await stateManager.getBalance(sender), 1000n)
     assert.strictEqual(await stateManager.getBalance(receiver), 0n)
   })
