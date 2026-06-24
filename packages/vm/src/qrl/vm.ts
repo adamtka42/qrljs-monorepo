@@ -1,34 +1,48 @@
-import { qrl as evmQrl } from '@ethereumjs/evm'
-import { qrl as stateQrl } from '@ethereumjs/statemanager'
+import type { qrl as evmQrl } from '@ethereumjs/evm'
+import type { qrl as stateQrl } from '@ethereumjs/statemanager'
 
 import { type QRLRunTxContext } from './context.ts'
-import { type QRLRunTxOptions, runQRLTx } from './runTx.ts'
+import { QRLLocalChain } from './localChain.ts'
+import type { QRLRunTxResult } from './result.ts'
+import { type QRLRunTxOptions } from './runTx.ts'
 
 export interface QRLVMOptions {
   stateManager?: stateQrl.QRLStateManager
   evm?: evmQrl.QRLEVM
   context?: QRLRunTxContext
+  localChain?: QRLLocalChain
 }
 
 export class QRLVM {
-  public readonly stateManager: stateQrl.QRLStateManager
-  public readonly evm: evmQrl.QRLEVM
+  public readonly localChain: QRLLocalChain
   private readonly context?: QRLRunTxContext
 
   public constructor(options: QRLVMOptions = {}) {
-    this.stateManager = options.stateManager ?? new stateQrl.QRLStateManager()
-    this.evm = options.evm ?? new evmQrl.QRLEVM({ stateManager: this.stateManager })
     this.context = options.context
+    this.localChain =
+      options.localChain ??
+      new QRLLocalChain({
+        stateManager: options.stateManager,
+        evm: options.evm,
+        context: this.context,
+      })
   }
 
-  public runTx(
+  public get stateManager(): stateQrl.QRLStateManager {
+    return this.localChain.stateManager
+  }
+
+  public get evm(): evmQrl.QRLEVM {
+    return this.localChain.evm
+  }
+
+  public async runTx(
     options: Omit<QRLRunTxOptions, 'stateManager' | 'evm'>,
-  ): ReturnType<typeof runQRLTx> {
-    return runQRLTx({
+  ): Promise<QRLRunTxResult> {
+    const result = await this.localChain.runTx({
       ...options,
-      stateManager: this.stateManager,
-      evm: this.evm,
       context: options.context ?? this.context,
     })
+    return result.runTxResult
   }
 }
