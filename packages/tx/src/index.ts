@@ -19,5 +19,8 @@ export {
 // Types
 export * from './types.ts'
 
+// QRL transaction helpers
+export * as qrl from './qrl/index.ts'
+
 // Utils
 export * from './util/index.ts'
