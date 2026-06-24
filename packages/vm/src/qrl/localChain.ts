@@ -185,6 +185,9 @@ export class QRLLocalChain {
         cumulativeGasUsed,
       })
     })
+    const transactions = pending.map((entry) => entry.tx)
+    const transactionsRoot = await blockQrl.genQRLTransactionsRoot(transactions)
+    const receiptsRoot = await blockQrl.genQRLReceiptsRoot(receipts)
 
     const draftBlock = new blockQrl.QRLBlock({
       header: {
@@ -194,8 +197,10 @@ export class QRLLocalChain {
         gasLimit: options.gasLimit ?? this.context?.gasLimit ?? latest.header.gasLimit,
         baseFee: options.baseFee ?? this.context?.baseFee ?? latest.header.baseFee,
         coinbase: options.coinbase ?? this.context?.coinbase ?? latest.header.coinbase,
+        transactionsRoot,
+        receiptsRoot,
       },
-      transactions: pending.map((entry) => entry.tx),
+      transactions,
       receipts,
     })
     const blockHash = draftBlock.hash()
@@ -209,7 +214,7 @@ export class QRLLocalChain {
     )
     const block = new blockQrl.QRLBlock({
       header: draftBlock.header,
-      transactions: pending.map((entry) => entry.tx),
+      transactions,
       receipts: includedReceipts,
     })
 

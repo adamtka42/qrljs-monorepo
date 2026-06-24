@@ -1,3 +1,4 @@
+import { qrl as blockQrl } from '@ethereumjs/block'
 import { qrl as txQrl } from '@ethereumjs/tx'
 import { bytesToHex, qrl as utilQrl } from '@ethereumjs/util'
 import { assert, describe, it } from 'vitest'
@@ -40,6 +41,14 @@ describe('QRLLocalChain', () => {
     assert.strictEqual(chain.getTransaction(transaction.hash()), transaction)
     assert.strictEqual(chain.getBlockByNumber(1n), result.block)
     assert.strictEqual(chain.getBlockByHash(result.block!.hash()), result.block)
+    assert.strictEqual(
+      bytesToHex(result.block!.header.transactionsRoot),
+      bytesToHex(await blockQrl.genQRLTransactionsRoot([transaction])),
+    )
+    assert.strictEqual(
+      bytesToHex(result.block!.header.receiptsRoot),
+      bytesToHex(await blockQrl.genQRLReceiptsRoot(result.block!.receipts)),
+    )
   })
 
   it('stores pending transactions when mining is disabled and mines them later', async () => {
