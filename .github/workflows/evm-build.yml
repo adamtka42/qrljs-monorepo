@@ -66,7 +66,11 @@ jobs:
         with:
           path: ${{github.workspace}}/packages/ethereum-tests
           key: ${{ inputs.submodule-cache-key }}
-          fail-on-cache-miss: true
+
+      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
+        name: Checkout ethereum-tests submodule
+        run: git submodule update --init --recursive packages/ethereum-tests
+        working-directory: ${{ github.workspace }}
 
       - run: npm run coverage
       - uses: codecov/codecov-action@v4

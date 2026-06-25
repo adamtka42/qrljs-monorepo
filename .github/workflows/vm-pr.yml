@@ -66,7 +66,11 @@ jobs:
         with:
           path: ${{github.workspace}}/packages/ethereum-tests
           key: ${{ inputs.submodule-cache-key}}
-          fail-on-cache-miss: true
+
+      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
+        name: Checkout ethereum-tests submodule
+        run: git submodule update --init --recursive packages/ethereum-tests
+        working-directory: ${{ github.workspace }}
 
       - run: npm run coverage
 
@@ -117,7 +121,11 @@ jobs:
         with:
           path: ${{github.workspace}}/packages/ethereum-tests
           key: ${{ inputs.submodule-cache-key}}
-          fail-on-cache-miss: true
+
+      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
+        name: Checkout ethereum-tests submodule
+        run: git submodule update --init --recursive packages/ethereum-tests
+        working-directory: ${{ github.workspace }}
 
       - if: contains(join(github.event.pull_request.labels.*.name, ' '), 'skip most stable VM') == false
         run: VITE_FORK=${{ matrix.fork }} VITE_VERIFY_TEST_AMOUNT_ALL_TESTS=1 npx vitest run test/tester/state.spec.ts
@@ -296,7 +304,11 @@ jobs:
         with:
           path: ${{github.workspace}}/packages/ethereum-tests
           key: ${{ inputs.submodule-cache-key}}
-          fail-on-cache-miss: true
+
+      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
+        name: Checkout ethereum-tests submodule
+        run: git submodule update --init --recursive packages/ethereum-tests
+        working-directory: ${{ github.workspace }}
 
 
       - run: VITE_FORK=${{ matrix.fork }} VITE_VERIFY_TEST_AMOUNT_ALL_TESTS=1 npx vitest run test/tester/state.spec.ts
@@ -349,7 +361,11 @@ jobs:
         with:
           path: ${{github.workspace}}/packages/ethereum-tests
           key: ${{ inputs.submodule-cache-key}}
-          fail-on-cache-miss: true
+
+      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
+        name: Checkout ethereum-tests submodule
+        run: git submodule update --init --recursive packages/ethereum-tests
+        working-directory: ${{ github.workspace }}
 
       - if: contains(join(github.event.pull_request.labels.*.name, ' '), 'skip most stable VM') == false
         run: npm run test:blockchain -- ${{ matrix.args }}
@@ -422,7 +438,11 @@ jobs:
         with:
           path: ${{github.workspace}}/packages/ethereum-tests
           key: ${{ inputs.submodule-cache-key}}
-          fail-on-cache-miss: true
+
+      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
+        name: Checkout ethereum-tests submodule
+        run: git submodule update --init --recursive packages/ethereum-tests
+        working-directory: ${{ github.workspace }}
 
       - run: npm run test:blockchain -- ${{ matrix.args }}
 
@@ -475,8 +495,10 @@ jobs:
           comment-on-alert: true
           # GitHub API token to make a commit comment
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # Push and deploy to GitHub pages branch automatically (if on master)
+          # Benchmark history is not published from PR checks in this fork.
           auto-push: 'false'
+          skip-fetch-gh-pages: true
+          save-data-file: false
 
       # Re-apply git stash to prepare for saving back to cache.
       # Avoids exit code 1 by checking if there are changes to be stashed first

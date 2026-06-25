@@ -331,6 +331,19 @@
     "bytevector",
     "hoodi",
     "feelyourprotocol",
-    "snobal"
+    "snobal",
+    "automine",
+    "Automine",
+    "CALLDATALOAD",
+    "DELEGATECALL",
+    "immediates",
+    "Jumpdests",
+    "MSIZE",
+    "qrljs",
+    "QRLJS",
+    "QRLEVM",
+    "QRLVM",
+    "QRVM",
+    "revertable"
   ]
 }

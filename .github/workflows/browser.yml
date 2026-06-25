@@ -68,6 +68,11 @@ jobs:
           path: ${{github.workspace}}/packages/ethereum-tests
           key: ${{ inputs.submodule-cache-key }}
 
+      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
+        name: Checkout ethereum-tests submodule
+        run: git submodule update --init --recursive packages/ethereum-tests
+        working-directory: ${{ github.workspace }}
+
       # Preinstalled Chromium (playwright@1.60.0) — no ~150MB download per run.
       - name: Run browser tests (Playwright container)
         run: |
