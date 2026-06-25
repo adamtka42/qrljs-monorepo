@@ -55,19 +55,9 @@
   "dependencies": {
     "@ethereumjs/rlp": "^10.1.2",
     "@ethereumjs/util": "^10.1.2",
-    "@noble/curves": "^2.0.1",
     "@noble/hashes": "^2.0.1"
   },
-  "devDependencies": {
-    "@paulmillr/trusted-setups": "^0.2.0",
-    "@types/minimist": "^1.2.5",
-    "@types/node-dir": "^0.0.37",
-    "kzg-wasm": "1.0.0",
-    "micro-eth-signer": "^0.15.0",
-    "minimist": "^1.2.8",
-    "node-dir": "^0.1.17",
-    "yargs": "^17.7.2"
-  },
+  "devDependencies": {},
   "engines": {
     "node": ">=20"
   }

@@ -50,13 +50,9 @@
     "@ethereumjs/mpt": "^10.1.2",
     "@ethereumjs/tx": "^10.1.2",
     "@ethereumjs/util": "^10.1.2",
-    "@noble/curves": "^2.0.1",
     "@noble/hashes": "^2.0.1"
   },
-  "devDependencies": {
-    "@paulmillr/trusted-setups": "^0.2.0",
-    "micro-eth-signer": "^0.15.0"
-  },
+  "devDependencies": {},
   "engines": {
     "node": ">=20"
   }
