@@ -4,15 +4,7 @@
     "/0x[0-9A-Fa-f]+/",
     "@scure"
   ],
-  "overrides": [
-    {
-      "filename": "**/packages/ethash/**",
-      "ignoreWords": [
-        "epoc",
-        "cmix"
-      ]
-    }
-  ],
+  "overrides": [],
   "words": [
     "CPSB",
     "undelegated",
@@ -25,7 +17,6 @@
     "unerasable",
     "bytelist",
     "bytestring",
-    "binarytree",
     "divmod",
     "merkelize",
     "kaust",
@@ -38,7 +29,6 @@
     "Hardfork",
     "hardfork",
     "Chainstart",
-    "ethash",
     "KECCAK",
     "keccak",
     "maxblob",
@@ -48,7 +38,6 @@
     "extradata",
     "randao",
     "Unpadded",
-    "Ethash",
     "blocktime",
     "timebomb",
     "prestate",
@@ -88,8 +77,6 @@
     "ethprotocol",
     "flowcontrol",
     "lesprotocol",
-    "fullethereumservice",
-    "lightethereumservice",
     "fullsync",
     "lightsync",
     "loglevel",
@@ -663,6 +650,7 @@
     "QRVM",
     "IMPLS",
     "impls",
-    "QRLJS"
+    "QRLJS",
+    "QRLJSEVM"
   ]
 }
