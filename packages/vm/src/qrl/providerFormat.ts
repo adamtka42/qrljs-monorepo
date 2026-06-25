@@ -1,6 +1,6 @@
 import type { qrl as blockQrl } from '@ethereumjs/block'
 import type { qrl as txQrl } from '@ethereumjs/tx'
-import { EthereumJSErrorWithoutCode, bytesToHex } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode, bytesToHex } from '@ethereumjs/util'
 import type { qrl } from '@ethereumjs/util'
 
 import type { QRLFormattedBlock, QRLFormattedTransaction } from './providerTypes.ts'
@@ -8,7 +8,7 @@ import type { QRLFormattedBlock, QRLFormattedTransaction } from './providerTypes
 export function qrlQuantity(value: bigint | number): string {
   const normalized = typeof value === 'number' ? BigInt(value) : value
   if (normalized < 0n) {
-    throw EthereumJSErrorWithoutCode('QRL quantity cannot be negative')
+    throw QRLJSErrorWithoutCode('QRL quantity cannot be negative')
   }
   return `0x${normalized.toString(16)}`
 }

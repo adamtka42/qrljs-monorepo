@@ -1,5 +1,5 @@
 import type { qrl } from '@ethereumjs/util'
-import { EthereumJSErrorWithoutCode } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode } from '@ethereumjs/util'
 
 import { QRL_DYNAMIC_FEE_TX_TYPE } from './constants.ts'
 import { QRLDynamicFeeTransaction } from './dynamicFee.ts'
@@ -20,7 +20,7 @@ export class QRLTransaction {
 
   static fromSerialized(bytes: Uint8Array): QRLTransaction {
     if (bytes[0] !== QRL_DYNAMIC_FEE_TX_TYPE) {
-      throw EthereumJSErrorWithoutCode(`Unsupported QRL transaction type=${bytes[0]}`)
+      throw QRLJSErrorWithoutCode(`Unsupported QRL transaction type=${bytes[0]}`)
     }
     return new QRLTransaction(QRLDynamicFeeTransaction.fromSerialized(bytes))
   }

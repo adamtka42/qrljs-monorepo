@@ -3,7 +3,7 @@ import {
   hexToBytes as hexToBytesNoble,
 } from '@noble/hashes/utils.js'
 
-import { EthereumJSErrorWithoutCode } from './errors.ts'
+import { QRLJSErrorWithoutCode } from './errors.ts'
 
 import type { PrefixedHexString } from './types.ts'
 
@@ -17,7 +17,7 @@ function stripHexPrefix(value: string): string {
 
 export const hexToBytes = (hex: PrefixedHexString): Uint8Array => {
   if (!hex.startsWith('0x')) {
-    throw EthereumJSErrorWithoutCode('input string must be 0x prefixed')
+    throw QRLJSErrorWithoutCode('input string must be 0x prefixed')
   }
   return hexToBytesNoble(padToEven(stripHexPrefix(hex)))
 }

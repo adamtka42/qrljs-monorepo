@@ -1,4 +1,4 @@
-import { EthereumJSErrorWithoutCode, equalsBytes } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode, equalsBytes } from '@ethereumjs/util'
 
 import { QRL_STORAGE_KEY_BYTES, QRL_STORAGE_VALUE_BYTES } from './constants.ts'
 
@@ -7,19 +7,19 @@ export type QRLStorageValue = Uint8Array
 
 export function assertQRLStorageKey(key: Uint8Array): void {
   if (!(key instanceof Uint8Array)) {
-    throw EthereumJSErrorWithoutCode('QRL storage key must be Uint8Array')
+    throw QRLJSErrorWithoutCode('QRL storage key must be Uint8Array')
   }
   if (key.length !== QRL_STORAGE_KEY_BYTES) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL storage key length=${key.length}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL storage key length=${key.length}`)
   }
 }
 
 export function assertQRLStorageValue(value: Uint8Array): void {
   if (!(value instanceof Uint8Array)) {
-    throw EthereumJSErrorWithoutCode('QRL storage value must be Uint8Array')
+    throw QRLJSErrorWithoutCode('QRL storage value must be Uint8Array')
   }
   if (value.length !== QRL_STORAGE_VALUE_BYTES) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL storage value length=${value.length}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL storage value length=${value.length}`)
   }
 }
 

@@ -1,6 +1,6 @@
 import { RLP } from '@ethereumjs/rlp'
 import {
-  EthereumJSErrorWithoutCode,
+  QRLJSErrorWithoutCode,
   bigIntToUnpaddedBytes,
   bytesToBigInt,
   bytesToHex,
@@ -169,13 +169,11 @@ export class QRLDynamicFeeTransaction {
 
   public static fromSerialized(serialized: Uint8Array): QRLDynamicFeeTransaction {
     if (serialized[0] !== QRL_DYNAMIC_FEE_TX_TYPE) {
-      throw EthereumJSErrorWithoutCode(
-        `Invalid QRL transaction type=${serialized[0] ?? 'undefined'}`,
-      )
+      throw QRLJSErrorWithoutCode(`Invalid QRL transaction type=${serialized[0] ?? 'undefined'}`)
     }
     const decoded = RLP.decode(serialized.subarray(1))
     if (!Array.isArray(decoded) || decoded.length !== 13) {
-      throw EthereumJSErrorWithoutCode('Invalid QRL dynamic fee transaction payload')
+      throw QRLJSErrorWithoutCode('Invalid QRL dynamic fee transaction payload')
     }
 
     const [
@@ -209,11 +207,11 @@ export class QRLDynamicFeeTransaction {
       publicKey,
     ]) {
       if (!(field instanceof Uint8Array)) {
-        throw EthereumJSErrorWithoutCode('Invalid QRL dynamic fee transaction scalar field')
+        throw QRLJSErrorWithoutCode('Invalid QRL dynamic fee transaction scalar field')
       }
     }
     if (!Array.isArray(accessList)) {
-      throw EthereumJSErrorWithoutCode('Invalid QRL dynamic fee transaction access list')
+      throw QRLJSErrorWithoutCode('Invalid QRL dynamic fee transaction access list')
     }
 
     const toBytes = asBytes(to)
@@ -244,12 +242,12 @@ function normalizeTxData(data: QRLDynamicFeeTxData): NormalizedQRLDynamicFeeTxDa
   const value = validateNonNegativeBigint('value', data.value ?? 0n)
 
   if (gasFeeCap < gasTipCap) {
-    throw EthereumJSErrorWithoutCode('QRL gasFeeCap cannot be less than gasTipCap')
+    throw QRLJSErrorWithoutCode('QRL gasFeeCap cannot be less than gasTipCap')
   }
 
   const descriptor = copyBytes(data.descriptor ?? new Uint8Array(QRL_DESCRIPTOR_BYTES))
   if (descriptor.length !== QRL_DESCRIPTOR_BYTES) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL descriptor length=${descriptor.length}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL descriptor length=${descriptor.length}`)
   }
 
   return {
@@ -285,13 +283,13 @@ function normalizeTo(to?: qrl.QRLAddress | Uint8Array | string): qrl.QRLAddress 
   if (typeof to === 'string') {
     return qrl.QRLAddress.fromString(to)
   }
-  throw EthereumJSErrorWithoutCode('Invalid QRL transaction to field')
+  throw QRLJSErrorWithoutCode('Invalid QRL transaction to field')
 }
 
 function validateBigintLike(name: string, value: bigint | number): bigint {
   if (typeof value === 'number') {
     if (!Number.isSafeInteger(value)) {
-      throw EthereumJSErrorWithoutCode(`QRL ${name} must be a safe integer`)
+      throw QRLJSErrorWithoutCode(`QRL ${name} must be a safe integer`)
     }
     return validateNonNegativeBigint(name, BigInt(value))
   }
@@ -300,24 +298,24 @@ function validateBigintLike(name: string, value: bigint | number): bigint {
 
 function validateNonNegativeBigint(name: string, value: bigint): bigint {
   if (typeof value !== 'bigint') {
-    throw EthereumJSErrorWithoutCode(`QRL ${name} must be a bigint`)
+    throw QRLJSErrorWithoutCode(`QRL ${name} must be a bigint`)
   }
   if (value < 0n) {
-    throw EthereumJSErrorWithoutCode(`QRL ${name} cannot be negative`)
+    throw QRLJSErrorWithoutCode(`QRL ${name} cannot be negative`)
   }
   return value
 }
 
 function copyBytes(bytes: Uint8Array): Uint8Array {
   if (!(bytes instanceof Uint8Array)) {
-    throw EthereumJSErrorWithoutCode('QRL transaction byte fields must be Uint8Array')
+    throw QRLJSErrorWithoutCode('QRL transaction byte fields must be Uint8Array')
   }
   return new Uint8Array(bytes)
 }
 
 function asBytes(value: unknown): Uint8Array {
   if (!(value instanceof Uint8Array)) {
-    throw EthereumJSErrorWithoutCode('Invalid QRL dynamic fee transaction scalar field')
+    throw QRLJSErrorWithoutCode('Invalid QRL dynamic fee transaction scalar field')
   }
   return value
 }

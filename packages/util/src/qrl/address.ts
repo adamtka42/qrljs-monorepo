@@ -2,7 +2,7 @@ import { RLP } from '@ethereumjs/rlp'
 import { keccak_512, shake256 } from '@noble/hashes/sha3.js'
 
 import { bytesToHex, equalsBytes, hexToBytes } from '../bytes.ts'
-import { EthereumJSErrorWithoutCode } from '../errors.ts'
+import { QRLJSErrorWithoutCode } from '../errors.ts'
 
 import { QRL_ADDRESS_BYTES, QRL_ADDRESS_HEX_LENGTH, QRL_ADDRESS_PREFIX } from './constants.ts'
 
@@ -37,7 +37,7 @@ export class QRLAddress {
    */
   static fromHex(hex: string): QRLAddress {
     if (!QRL_HEX_RE.test(hex)) {
-      throw EthereumJSErrorWithoutCode(`Invalid QRL address hex input=${hex}`)
+      throw QRLJSErrorWithoutCode(`Invalid QRL address hex input=${hex}`)
     }
     return new QRLAddress(hexToBytes(hex as PrefixedHexString))
   }
@@ -47,7 +47,7 @@ export class QRLAddress {
    */
   static fromString(value: string): QRLAddress {
     if (!isValidQRLAddress(value)) {
-      throw EthereumJSErrorWithoutCode(`Invalid QRL address input=${value}`)
+      throw QRLJSErrorWithoutCode(`Invalid QRL address input=${value}`)
     }
     return new QRLAddress(hexToBytes(`0x${value.slice(1)}` as PrefixedHexString))
   }
@@ -100,10 +100,10 @@ export class QRLAddress {
  */
 export function assertQRLAddressBytes(bytes: Uint8Array): void {
   if (!(bytes instanceof Uint8Array)) {
-    throw EthereumJSErrorWithoutCode('QRL address bytes must be Uint8Array')
+    throw QRLJSErrorWithoutCode('QRL address bytes must be Uint8Array')
   }
   if (bytes.length !== QRL_ADDRESS_BYTES) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL address length=${bytes.length}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL address length=${bytes.length}`)
   }
 }
 
@@ -136,7 +136,7 @@ export function qrlAddressFromHex(hex: string): QRLAddress {
 
 export function createQRLContractAddress(sender: QRLAddress, nonce: bigint): QRLAddress {
   if (nonce < 0n || nonce > UINT64_MAX) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL contract nonce=${nonce.toString()}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL contract nonce=${nonce.toString()}`)
   }
   const encoded = RLP.encode([sender.toBytes(), nonce] as Input)
   return QRLAddress.fromBytes(qrlContractAddressHash(encoded))
@@ -148,12 +148,10 @@ export function createQRLContractAddress2(
   initCodeHash: Uint8Array,
 ): QRLAddress {
   if (salt64.length !== QRL_ADDRESS_BYTES) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL CREATE2 salt length=${salt64.length}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL CREATE2 salt length=${salt64.length}`)
   }
   if (initCodeHash.length !== 32) {
-    throw EthereumJSErrorWithoutCode(
-      `Invalid QRL CREATE2 init code hash length=${initCodeHash.length}`,
-    )
+    throw QRLJSErrorWithoutCode(`Invalid QRL CREATE2 init code hash length=${initCodeHash.length}`)
   }
   return QRLAddress.fromBytes(
     qrlContractAddressHash(new Uint8Array([0xff]), sender.toBytes(), salt64, initCodeHash),

@@ -1,5 +1,5 @@
-import { EthereumJSErrorWithoutCode } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode } from '@ethereumjs/util'
 
 export function qrlBlockError(message: string): Error {
-  return EthereumJSErrorWithoutCode(message)
+  return QRLJSErrorWithoutCode(message)
 }

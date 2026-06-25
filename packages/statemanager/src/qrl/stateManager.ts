@@ -1,4 +1,4 @@
-import { EthereumJSErrorWithoutCode, bytesToHex, hexToBytes, qrl } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode, bytesToHex, hexToBytes, qrl } from '@ethereumjs/util'
 import { keccak_256 } from '@noble/hashes/sha3.js'
 
 import { QRLAccount, normalizeBalance, normalizeNonce } from './account.ts'
@@ -81,7 +81,7 @@ export class QRLStateManager {
     const balance = normalizeBalance(amount)
     const current = await this.getBalance(address)
     if (balance > current) {
-      throw EthereumJSErrorWithoutCode('QRL account balance underflow')
+      throw QRLJSErrorWithoutCode('QRL account balance underflow')
     }
     await this.setBalance(address, current - balance)
   }
@@ -140,14 +140,14 @@ export class QRLStateManager {
 
   public async commit(): Promise<void> {
     if (this.stack.length <= 1) {
-      throw EthereumJSErrorWithoutCode('Cannot commit without an active QRL state checkpoint')
+      throw QRLJSErrorWithoutCode('Cannot commit without an active QRL state checkpoint')
     }
     this.stack.splice(-2, 1)
   }
 
   public async revert(): Promise<void> {
     if (this.stack.length <= 1) {
-      throw EthereumJSErrorWithoutCode('Cannot revert without an active QRL state checkpoint')
+      throw QRLJSErrorWithoutCode('Cannot revert without an active QRL state checkpoint')
     }
     this.stack.pop()
   }
@@ -258,7 +258,7 @@ function parseGenesisBigInt(value: bigint | string): bigint {
   if (/^[0-9]+$/.test(value)) {
     return normalizeBalance(BigInt(value))
   }
-  throw EthereumJSErrorWithoutCode(`Invalid QRL genesis bigint=${value}`)
+  throw QRLJSErrorWithoutCode(`Invalid QRL genesis bigint=${value}`)
 }
 
 function parseGenesisBytes(value: Uint8Array | string): Uint8Array {
@@ -266,7 +266,7 @@ function parseGenesisBytes(value: Uint8Array | string): Uint8Array {
     return new Uint8Array(value)
   }
   if (!/^0x[0-9a-fA-F]*$/.test(value)) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL genesis hex bytes=${value}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL genesis hex bytes=${value}`)
   }
   return hexToBytes(value as PrefixedHexString)
 }

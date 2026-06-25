@@ -662,6 +662,7 @@
     "QRLVM",
     "QRVM",
     "IMPLS",
-    "impls"
+    "impls",
+    "QRLJS"
   ]
 }

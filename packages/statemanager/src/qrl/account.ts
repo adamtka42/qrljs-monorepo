@@ -1,4 +1,4 @@
-import { EthereumJSErrorWithoutCode, equalsBytes } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode, equalsBytes } from '@ethereumjs/util'
 
 import {
   QRL_EMPTY_CODE_HASH,
@@ -78,23 +78,23 @@ export class QRLAccount {
 export function normalizeNonce(nonce: bigint | number): bigint {
   const value = typeof nonce === 'number' ? BigInt(nonce) : nonce
   if (typeof value !== 'bigint' || value < 0n || value > QRL_STATE_NONCE_MAX) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL account nonce=${nonce.toString()}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL account nonce=${nonce.toString()}`)
   }
   return value
 }
 
 export function normalizeBalance(balance: bigint): bigint {
   if (typeof balance !== 'bigint' || balance < 0n) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL account balance=${balance.toString()}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL account balance=${balance.toString()}`)
   }
   return balance
 }
 
 function assertStateHash(name: string, value: Uint8Array): void {
   if (!(value instanceof Uint8Array)) {
-    throw EthereumJSErrorWithoutCode(`QRL account ${name} must be Uint8Array`)
+    throw QRLJSErrorWithoutCode(`QRL account ${name} must be Uint8Array`)
   }
   if (value.length !== QRL_STATE_HASH_BYTES) {
-    throw EthereumJSErrorWithoutCode(`Invalid QRL account ${name} length=${value.length}`)
+    throw QRLJSErrorWithoutCode(`Invalid QRL account ${name} length=${value.length}`)
   }
 }
