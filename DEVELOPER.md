@@ -142,21 +142,9 @@ When `--scope` is set to a value other than `ethereumjs`, the script:
 
 The `--scope` flag is fully generic and not tied to any specific npm org.
 
-##### CHANGELOG Preparation
+##### Release Notes
 
-The following prompt has been tested with Cursor IDE to work well for CHANGELOG updates (please update placeholders in the first paragraph accordingly):
-
-```markdown
-I want to do a new release round for all active packages listed in @README.md. Version bump has already been done, see an exemplary [ REFERENCE package.json FILE ] file, release is target for today. Last release round has been done on [ ENTER DATE IN FORMAT: April 29 2025 ] along commit [ ENTER COMMIT HASH, e.g.: 9e461f54312bf20c710b43ab73f7d3ad753f8765 ]. An exemplary CHANGELOG.md file is [ REFERENCE e.g. block CHANGELOG.md file ].
-
-Can you please add new sections in the CHANGELOG files and add one-line summaries for the user-facing changes? For this please go for the commits since last release, one commit represents one PR due to our (squash) merge policy. You can leave out PRs only updating documentation, code in the examples folder or tests. Also tooling infrastructure (linting,...) and CI updating PRs can be left out. New support for new and deprecation for older Node.js as well as TypeScript versions should be added. Version updates for external dependencies - so not from within the monorepo - should be added as well.
-
-Here is an example for the format of a change/PR entry:
-
-- New default hardfork: `Shanghai` -> `Cancun`, see PR [#3566](https://github.com/ethereumjs/ethereumjs-monorepo/pull/3566)
-
-For the CHANGELOG files you have not added lines in this step please nevertheless add a CHANGELOG entry (we do releases for all active packages no matter the changeset) and enter the following sentence: Maintenance release, no active changes.
-```
+Package changelogs are not maintained in this QRL-focused repository. GitHub release notes are generated from package metadata by default. For richer notes, use the release commit range and summarize user-facing changes in the release body.
 
 #### Windows Users Note
 
