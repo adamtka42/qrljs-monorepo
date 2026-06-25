@@ -8,7 +8,6 @@ export default mergeConfig(
       exclude: [
         ...configDefaults.exclude,
         // default export for minimist
-        // wrong ethereum-tests path reference (../ is stripped)
         'test/transactionRunner.spec.ts',
         'test/eip4844.spec.ts',
         'test/eip7594.spec.ts',

@@ -5,15 +5,9 @@ on:
       dep-cache-key:
         required: true
         type: string
-      submodule-cache-key:
-          required: true
-          type: string
   workflow_dispatch:
     inputs:
       dep-cache-key:
-        required: false
-        default: 'none'
-      submodule-cache-key:
         required: false
         default: 'none'
 
@@ -37,8 +31,6 @@ jobs:
       # `cache: 'npm'`. The workspace dep-cache restore further down can miss
       # for fresh PRs and would otherwise leave the workspace empty.
       - uses: actions/checkout@v5
-        with:
-          submodules: ${{ inputs.submodule-cache-key == 'none' && 'recursive' || '' }}
 
       # We restore the code/deps from cache if triggered from workflow_call (i.e. have valid cache key)
       - if: inputs.dep-cache-key != 'none'
@@ -57,19 +49,6 @@ jobs:
       - name: Install Dependencies (if called from workflow_dispatch)
         if: steps.dep-cache.outputs.cache-hit != 'true'
         run: npm ci
-        working-directory: ${{ github.workspace }}
-
-      - if: inputs.submodule-cache-key != 'none'
-        uses: actions/cache/restore@v4
-        name: Initialize ethereum-tests
-        id: submodules-cache
-        with:
-          path: ${{github.workspace}}/packages/ethereum-tests
-          key: ${{ inputs.submodule-cache-key}}
-
-      - if: inputs.submodule-cache-key != 'none' && steps.submodules-cache.outputs.cache-hit != 'true'
-        name: Checkout ethereum-tests submodule
-        run: git submodule update --init --recursive packages/ethereum-tests
         working-directory: ${{ github.workspace }}
 
       - run: npm run coverage

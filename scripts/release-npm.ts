@@ -68,11 +68,9 @@ const PUBLISH_ORDER = [
   'vm',
 ]
 
-// Deprecated packages + testdata (only dependencies updated, not published)
-// These packages keep their own version but need @ethereumjs/* deps updated
+// Deprecated packages kept out of npm publishing but still dependency-rewritten.
 const DEPS_ONLY_PACKAGES = [
   'ethash',
-  'testdata',
 ]
 
 interface PackageJson {
@@ -358,7 +356,7 @@ async function main(): Promise<void> {
     })
   }
 
-  // Read package.json files for deps-only packages (deprecated + testdata)
+  // Read package.json files for deps-only packages (deps-only)
   // Skipped entirely for fork releases (not published, rewriting would break local dev)
   const depsOnlyPackages: PackageInfo[] = []
   if (!isFork) {
@@ -380,7 +378,7 @@ async function main(): Promise<void> {
     console.log(`  ${pkg.name}: ${pkg.oldVersion}`)
   }
   if (!isFork) {
-    console.log('\nDeps-only packages (deprecated + testdata):')
+    console.log('\nDeps-only packages (deps-only):')
     for (const pkg of depsOnlyPackages) {
       console.log(`  ${pkg.name}: ${pkg.oldVersion}`)
     }

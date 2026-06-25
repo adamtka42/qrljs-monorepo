@@ -23,7 +23,6 @@ export default [
       '**/typedoc.*',
       '**/vitest.config.*',
       '**/vite.*.ts',
-      '**/ethereum-tests/**',
       '**/devnets/**',
       '**/eslint/**',
       '**/lint-staged.config.js',
