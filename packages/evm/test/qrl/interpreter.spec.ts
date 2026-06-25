@@ -239,12 +239,14 @@ describe('QRLEVM interpreter', () => {
     assert.isUndefined(result.exceptionError)
     assert.strictEqual(stored[63], 0x2a)
     assert.strictEqual(result.logs?.length, 1)
-    assert.strictEqual(result.logs[0].address.toString(), utilQrl.QRLAddress.zero().toString())
-    assert.strictEqual(result.logs[0].topics.length, 1)
-    assert.strictEqual(result.logs[0].topics[0].length, 64)
-    assert.strictEqual(result.logs[0].topics[0][63], 0x7b)
-    assert.strictEqual(result.logs[0].data.length, 64)
-    assert.strictEqual(result.logs[0].data[63], 0x2a)
+    const [log] = result.logs ?? []
+    assert.exists(log)
+    assert.strictEqual(log.address.toString(), utilQrl.QRLAddress.zero().toString())
+    assert.strictEqual(log.topics.length, 1)
+    assert.strictEqual(log.topics[0].length, 64)
+    assert.strictEqual(log.topics[0][63], 0x7b)
+    assert.strictEqual(log.data.length, 64)
+    assert.strictEqual(log.data[63], 0x2a)
   })
 
   it('rejects LOG opcodes in static execution', async () => {

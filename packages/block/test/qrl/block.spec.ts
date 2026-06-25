@@ -98,7 +98,7 @@ describe('QRLBlock', () => {
           new Uint8Array([1]),
           new Uint8Array([4]),
           receipts[0].logsBloom,
-          [[log.address.toBytes(), log.topics, log.data]],
+          [[log.address.toBytes(), [...log.topics], log.data]],
         ]),
       ),
     )

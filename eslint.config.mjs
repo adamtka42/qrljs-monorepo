@@ -156,14 +156,6 @@ export default [
     },
   },
   {
-    files: ['packages/client/test/sim/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-      'no-console': 'off',
-      'no-undef': 'off',
-    },
-  },
-  {
     files: ['**/*.js', '**/*.cjs', '**/*.cts'],
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
@@ -190,14 +182,7 @@ export default [
     },
   },
   {
-    files: ['packages/devp2p/**'],
-    rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-    },
-  },
-  {
-    files: ['packages/devp2p/src/ext/**', 'packages/client/src/ext/**', '**/test/**/*.ts'],
+    files: ['**/test/**/*.ts'],
     rules: {
       'no-restricted-syntax': 'off',
       'no-restricted-properties': [
@@ -213,12 +198,6 @@ export default [
           message: 'Usage of assert.notOk is forbidden because it relies on falseness.',
         },
       ],
-    },
-  },
-  {
-    files: ['packages/wallet/**'],
-    rules: {
-      'no-prototype-builtins': 'warn',
     },
   },
   {

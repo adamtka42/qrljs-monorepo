@@ -22,7 +22,6 @@ It is intended to be both an entrypoint for external contributors as well as a r
   - [Shared Dependencies](#shared-dependencies)
 - [Additional Docs](#additional-docs)
   - [VM](#vm)
-  - [Client](#client)
 
 ## Monorepo
 
@@ -343,7 +342,3 @@ There are selected additional developer docs available to get more deep on certa
 ### VM
 
 [VM Docs](./packages/vm/DEVELOPER.md) for testing, debugging and VM/EVM profiling.
-
-### Client
-
-[Client Docs](./packages/client/DEVELOPER.md) for running Hive tests.

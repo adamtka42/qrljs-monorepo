@@ -33,14 +33,7 @@ jobs:
         run: npm run test:node
         working-directory: packages/blockchain
 
-      # Switch client to unit tests only due to `async_hooks` dependency build error in browser tests: 2022-06-15
-      - name: Test Client
-        run: npm run test
-        working-directory: packages/client
 
-      - name: Test Devp2p
-        run: npm run test
-        working-directory: packages/devp2p
 
       - name: Test Common
         run: npm run test:node
@@ -49,6 +42,7 @@ jobs:
       - name: Test Ethash
         run: npm run test
         working-directory: packages/ethash
+
 
       - name: Test EVM
         run: npm run test:node
@@ -77,7 +71,3 @@ jobs:
       - name: Test RLP
         run: npm run test:node
         working-directory: packages/rlp
-
-      - name: Test Wallet
-        run: npm run test:node
-        working-directory: packages/wallet

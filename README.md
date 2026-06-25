@@ -51,10 +51,7 @@ The following packages are deprecated and will not be updated.
 
 | package                                          | npm                                                             | issues                                                                        | tests                                                                      | coverage                                                                    |
 | ------------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [@ethereumjs/client][client-package]             | [![NPM Package][client-npm-badge]][client-npm-link]             | [![Client Issues][client-issues-badge]][client-issues-link]                   | [![Actions Status][client-actions-badge]][client-actions-link]             | [![Code Coverage][client-coverage-badge]][client-coverage-link]             |
-| [@ethereumjs/devp2p][devp2p-package]             | [![NPM Package][devp2p-npm-badge]][devp2p-npm-link]             | [![Devp2p Issues][devp2p-issues-badge]][devp2p-issues-link]                   | [![Actions Status][devp2p-actions-badge]][devp2p-actions-link]             | [![Code Coverage][devp2p-coverage-badge]][devp2p-coverage-link]             |
 | [@ethereumjs/ethash][ethash-package]             | [![NPM Package][ethash-npm-badge]][ethash-npm-link]             | [![Ethash Issues][ethash-issues-badge]][ethash-issues-link]                   | [![Actions Status][ethash-actions-badge]][ethash-actions-link]             | [![Code Coverage][ethash-coverage-badge]][ethash-coverage-link]             |
-| [@ethereumjs/wallet][wallet-package]             | [![NPM Package][wallet-npm-badge]][wallet-npm-link]             | [![Wallet Issues][wallet-issues-badge]][wallet-issues-link]                   | [![Actions Status][wallet-actions-badge]][wallet-actions-link]             | [![Code Coverage][wallet-coverage-badge]][wallet-coverage-link]             |
 
 ## Getting Started
 
@@ -112,16 +109,10 @@ To inspect code related to a specific package version, refer to the [tags](https
 ```mermaid
  graph TD
    vm{vm}
-   client{client}
    ethash --> blockchain
-   ethash --> client
-   devp2p --> client
-   block --> client
    block --> blockchain
    block --> ethash
    block --> vm
-   blockchain --> client
-   mpt --> client
    mpt --> vm
    mpt --> blockchain
    mpt --> block
@@ -135,26 +126,15 @@ To inspect code related to a specific package version, refer to the [tags](https
    common --> blockchain
    common --> vm
    common --> evm
-   common --> client
-   common --> devp2p
    common --> genesis
    evm --> vm
-   evm --> client
-   genesis --> client
    genesis --> statemanager
    genesis --> mpt
    tx --> block
    tx --> vm
-   tx --> client
-   vm --> client
    rlp --> util
-   rlp --> e2store
-   util --> e2store
-   block --> e2store
-   blockchain --> e2store
    statemanager --> evm
    statemanager --> vm
-   statemanager --> client
 ```
 
 To update the diagram above edit the README file and open a new PR with the changes.
@@ -203,15 +183,6 @@ Most packages are [MPL-2.0](<https://tldrlegal.com/license/mozilla-public-licens
 [blockchain-coverage-badge]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/branch/master/graph/badge.svg?flag=blockchain
 [blockchain-coverage-link]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/tree/master/packages/blockchain
 
-[client-package]: ./packages/client
-[client-npm-badge]: https://img.shields.io/npm/v/@ethereumjs/client.svg
-[client-npm-link]: https://www.npmjs.com/package/@ethereumjs/client
-[client-issues-badge]: https://img.shields.io/github/issues/ethereumjs/ethereumjs-monorepo/package:%20client?label=issues
-[client-issues-link]: https://github.com/ethereumjs/ethereumjs-monorepo/issues?q=is%3Aopen+is%3Aissue+label%3A"package%3A+client"
-[client-actions-badge]: https://github.com/ethereumjs/ethereumjs-monorepo/workflows/Client/badge.svg
-[client-actions-link]: https://github.com/ethereumjs/ethereumjs-monorepo/actions?query=workflow%3A%22Client%22
-[client-coverage-badge]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/branch/master/graph/badge.svg?flag=client
-[client-coverage-link]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/tree/master/packages/client
 
 [common-package]: ./packages/common
 [common-npm-badge]: https://img.shields.io/npm/v/@ethereumjs/common.svg
@@ -223,21 +194,7 @@ Most packages are [MPL-2.0](<https://tldrlegal.com/license/mozilla-public-licens
 [common-coverage-badge]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/branch/master/graph/badge.svg?flag=common
 [common-coverage-link]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/tree/master/packages/common
 
-[devp2p-package]: ./packages/devp2p
-[devp2p-npm-badge]: https://img.shields.io/npm/v/@ethereumjs/devp2p.svg
-[devp2p-npm-link]: https://www.npmjs.com/package/@ethereumjs/devp2p
-[devp2p-issues-badge]: https://img.shields.io/github/issues/ethereumjs/ethereumjs-monorepo/package:%20devp2p?label=issues
-[devp2p-issues-link]: https://github.com/ethereumjs/ethereumjs-monorepo/issues?q=is%3Aopen+is%3Aissue+label%3A"package%3A+devp2p"
-[devp2p-actions-badge]: https://github.com/ethereumjs/ethereumjs-monorepo/workflows/Devp2p/badge.svg
-[devp2p-actions-link]: https://github.com/ethereumjs/ethereumjs-monorepo/actions?query=workflow%3A%22Devp2p%22
-[devp2p-coverage-badge]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/branch/master/graph/badge.svg?flag=devp2p
-[devp2p-coverage-link]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/tree/master/packages/devp2p
 
-[e2store-package]: ./packages/e2store
-[e2store-npm-badge]: https://img.shields.io/npm/v/@ethereumjs/e2store.svg
-[e2store-npm-link]: https://www.npmjs.com/package/@ethereumjs/e2store
-[e2store-issues-badge]: https://img.shields.io/github/issues/ethereumjs/ethereumjs-monorepo/package:%20e2store?label=issues
-[e2store-issues-link]: https://github.com/ethereumjs/ethereumjs-monorepo/issues?q=is%3Aopen+is%3Aissue+label%3A"package%3A+e2store"
 
 [ethash-package]: ./packages/ethash
 [ethash-npm-badge]: https://img.shields.io/npm/v/@ethereumjs/ethash.svg
@@ -328,13 +285,3 @@ Most packages are [MPL-2.0](<https://tldrlegal.com/license/mozilla-public-licens
 [vm-actions-link]: https://github.com/ethereumjs/ethereumjs-monorepo/actions?query=workflow%3A%22VM%22
 [vm-coverage-badge]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/branch/master/graph/badge.svg?flag=vm
 [vm-coverage-link]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/tree/master/packages/vm
-
-[wallet-package]: ./packages/wallet
-[wallet-npm-badge]: https://img.shields.io/npm/v/@ethereumjs/wallet.svg
-[wallet-npm-link]: https://www.npmjs.com/package/@ethereumjs/wallet
-[wallet-issues-badge]: https://img.shields.io/github/issues/ethereumjs/ethereumjs-monorepo/package:%20wallet?label=issues
-[wallet-issues-link]: https://github.com/ethereumjs/ethereumjs-monorepo/issues?q=is%3Aopen+is%3Aissue+label%3A"package%3A+wallet"
-[wallet-actions-badge]: https://github.com/ethereumjs/ethereumjs-monorepo/workflows/Wallet/badge.svg
-[wallet-actions-link]: https://github.com/ethereumjs/ethereumjs-monorepo/actions?query=workflow%3A%22wallet%22
-[wallet-coverage-badge]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/branch/master/graph/badge.svg?flag=wallet
-[wallet-coverage-link]: https://codecov.io/gh/ethereumjs/ethereumjs-monorepo/tree/master/packages/wallet
