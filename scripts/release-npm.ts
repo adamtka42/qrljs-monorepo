@@ -38,12 +38,8 @@ const DEFAULT_SCOPE = 'ethereumjs'
 
 // Active packages from README.md (version + dependencies updated, published)
 const ACTIVE_PACKAGES = [
-  'binarytree',
   'block',
-  'blockchain',
-  'common',
   'evm',
-  'genesis',
   'mpt',
   'rlp',
   'statemanager',
@@ -56,21 +52,17 @@ const ACTIVE_PACKAGES = [
 const PUBLISH_ORDER = [
   'rlp',
   'util',
-  'common',
-  'binarytree',
-  'genesis',
-  'tx',
   'mpt',
+  'tx',
   'block',
   'statemanager',
   'evm',
-  'blockchain',
   'vm',
 ]
 
 // Deprecated packages kept out of npm publishing but still dependency-rewritten.
 const DEPS_ONLY_PACKAGES = [
-  'ethash',
+
 ]
 
 interface PackageJson {

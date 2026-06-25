@@ -4,14 +4,13 @@
     "rootDir": "src",
     "outDir": "dist/cjs"
   },
-  "include": ["src/**/*.ts", "src/**/*.json"],
+  "include": ["src/index.ts", "src/qrl/**/*.ts"],
   "references": [
-    { "path": "../binarytree/tsconfig.prod.cjs.json" },
-    { "path": "../common/tsconfig.prod.cjs.json" },
-    { "path": "../rlp/tsconfig.prod.cjs.json" },
-    { "path": "../statemanager/tsconfig.prod.cjs.json" },
-    { "path": "../mpt/tsconfig.prod.cjs.json" },
-    { "path": "../tx/tsconfig.prod.cjs.json" },
-    { "path": "../util/tsconfig.prod.cjs.json" }
+    {
+      "path": "../statemanager/tsconfig.prod.cjs.json"
+    },
+    {
+      "path": "../util/tsconfig.prod.cjs.json"
+    }
   ]
 }

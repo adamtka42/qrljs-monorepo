@@ -46,7 +46,6 @@
     "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts"
   },
   "dependencies": {
-    "@ethereumjs/common": "^10.1.2",
     "@ethereumjs/rlp": "^10.1.2",
     "@ethereumjs/mpt": "^10.1.2",
     "@ethereumjs/tx": "^10.1.2",

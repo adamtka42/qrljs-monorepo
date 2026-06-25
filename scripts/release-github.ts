@@ -27,12 +27,8 @@ import * as readline from 'readline'
 
 // Active packages from README.md (same as release.ts)
 const ACTIVE_PACKAGES = [
-  'binarytree',
   'block',
-  'blockchain',
-  'common',
   'evm',
-  'genesis',
   'mpt',
   'rlp',
   'statemanager',
