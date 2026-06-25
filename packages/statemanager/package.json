@@ -1,23 +1,22 @@
 {
   "name": "@ethereumjs/statemanager",
   "version": "10.1.2",
-  "description": "An Ethereum statemanager implementation",
-  "keywords": ["ethereum", "statemanager"],
-  "homepage": "https://github.com/ethereumjs/ethereumjs-monorepo/tree/master/packages/statemanager#readme",
+  "description": "In-memory QRL account, storage, and genesis state manager",
+  "keywords": ["qrl", "statemanager", "state"],
+  "homepage": "https://github.com/adamtka42/qrljs-monorepo/tree/qrl-adaptation/packages/statemanager#readme",
   "bugs": {
-    "url": "https://github.com/ethereumjs/ethereumjs-monorepo/issues?q=is%3Aissue+label%3A%22package%3A+statemanager%22"
+    "url": "https://github.com/adamtka42/qrljs-monorepo/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ethereumjs/ethereumjs-monorepo.git"
+    "url": "https://github.com/adamtka42/qrljs-monorepo.git",
+    "directory": "packages/statemanager"
   },
   "license": "MPL-2.0",
-  "author": "EthereumJS Team",
+  "author": "QRL JS contributors",
   "contributors": ["g11tech <gajinder@g11.in>"],
-  "type": "module",
   "sideEffects": false,
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "type": "module",
   "exports": {
     ".": {
       "import": {
@@ -27,6 +26,8 @@
       "require": "./dist/cjs/index.js"
     }
   },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "files": ["dist", "src"],
   "scripts": {
     "biome": "npx @biomejs/biome check",
@@ -39,8 +40,8 @@
     "lint:fix": "npm run biome:fix && eslint  --fix --config ./eslint.config.mjs .",
     "prepublishOnly": "../../config/cli/prepublish.sh && npm run test:node",
     "test": "npm run test:qrl",
-    "tsc": "../../config/cli/ts-compile.sh",
-    "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts"
+    "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts",
+    "tsc": "../../config/cli/ts-compile.sh"
   },
   "dependencies": {
     "@ethereumjs/util": "^10.1.2",

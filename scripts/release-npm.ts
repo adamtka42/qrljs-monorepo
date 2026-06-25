@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Release script for EthereumJS monorepo packages
+ * Release script for QRL JS monorepo packages
  *
  * Supports both regular releases and in-between releases (nightly, alpha, etc.)
  * Optionally publishes under a different npm scope (e.g. for fork releases).
@@ -323,7 +323,7 @@ async function main(): Promise<void> {
   const isFork = scope !== DEFAULT_SCOPE
 
   console.log('\n' + '='.repeat(60))
-  console.log('EthereumJS Release Script')
+  console.log('QRL JS Release Script')
   console.log('='.repeat(60))
   console.log(`Bump version: ${version ?? 'no'}`)
   console.log(`Publish: ${tag ? `yes (tag: ${tag})` : 'no'}`)

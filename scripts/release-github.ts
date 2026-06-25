@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * GitHub Release script for EthereumJS monorepo packages
+ * GitHub release script for QRL JS monorepo packages
  *
  * Creates GitHub releases for all active packages after npm releases are done.
  * Creates package release notes from package metadata or optional changelog files.
@@ -37,9 +37,9 @@ const ACTIVE_PACKAGES = [
   'vm',
 ]
 
-const REPO_OWNER = 'ethereumjs'
-const REPO_NAME = 'ethereumjs-monorepo'
-const TARGET_BRANCH = 'master'
+const REPO_OWNER = 'adamtka42'
+const REPO_NAME = 'qrljs-monorepo'
+const TARGET_BRANCH = 'qrl-adaptation'
 
 interface ParsedArgs {
   version: string
@@ -203,7 +203,7 @@ async function main(): Promise<void> {
   const { version, startWith } = parseArgs()
 
   console.log('\n' + '='.repeat(60))
-  console.log('EthereumJS GitHub Release Script')
+  console.log('QRL JS GitHub Release Script')
   console.log('='.repeat(60))
   console.log(`Version: ${version}`)
   console.log(`Target branch: ${TARGET_BRANCH}`)
