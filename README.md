@@ -8,7 +8,7 @@ generic helpers it still uses: RLP encoding, utility functions, local trie root
 support, QRL transactions, blocks, state management, EVM-like execution, and the
 local VM/provider layer.
 
-Ethereum-specific packages that are not part of the QRL local execution path have
+Upstream packages that are not part of the QRL local execution path have
 been removed from the workspace. Package names and internal imports use the QRL `@theqrl/*` scope.
 
 ## Active Packages

@@ -261,7 +261,7 @@ function toBytes(v: Input): Uint8Array {
 }
 
 /**
- * RLP Encoding based on https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp/
+ * RLP encoding for nested byte arrays and scalar byte inputs.
  * This function takes in data, converts it to Uint8Array if not,
  * and adds a length for recursion.
  * @param input Will be converted to Uint8Array
@@ -286,7 +286,7 @@ export function encode(input: Input): Uint8Array {
 }
 
 /**
- * RLP Decoding based on https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp/
+ * RLP decoding for nested byte arrays and scalar byte inputs.
  * @param input Will be converted to Uint8Array
  * @param stream Is the input a stream (false by default)
  * @returns decoded Array of Uint8Arrays containing the original message

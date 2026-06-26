@@ -53,7 +53,7 @@ export default [
         {
           selector: "ThrowStatement > NewExpression[callee.name='Error']",
           message:
-            'Throwing default JS Errors is not allowed. Only throw `EthereumJSError` (see the util package)',
+            'Throwing default JS Errors is not allowed. Only throw `QRLJSError` (see the util package)',
         },
       ],
       'no-restricted-globals': [
