@@ -7,10 +7,8 @@ export default mergeConfig(
     test: {
       exclude: [
         ...configDefaults.exclude,
-        // Importing pedersenHash through wasm failed.
-        'test/statelessVerkleStateManager.spec.ts',
-        // [vitest] queueMock is not implemented in browser environment yet.
-        'test/rpcStateManager.spec.ts',
+        // The QRL state manager tests are validated in the node environment.
+        'test/qrl/**/*.spec.ts',
       ],
     },
   }),

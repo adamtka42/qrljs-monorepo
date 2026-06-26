@@ -21,10 +21,4 @@ export default [
       'no-restricted-syntax': 'off',
     },
   },
-  {
-    files: ['test/util.ts', 'test/tester/**/*.ts', 'examples/**/*.ts'],
-    rules: {
-      'no-console': 'off',
-    },
-  },
 ]

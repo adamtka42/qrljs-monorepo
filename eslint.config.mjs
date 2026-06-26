@@ -13,7 +13,6 @@ export default [
       '**/.eslintrc.cjs',
       '**/.eslintrc.js',
       '**/eslint.config.mjs',
-      '**/benchmarks',
       '**/coverage',
       '**/dist/*',
       '**/node_modules',
@@ -130,7 +129,6 @@ export default [
   },
   {
     files: ['**/*.ts'],
-    ignores: ['**/examples/*.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -162,19 +160,6 @@ export default [
     },
   },
   {
-    files: [
-      '**/examples/**/*.ts',
-      '**/examples/**/*.js',
-      '**/examples/**/*.cjs',
-      '**/benchmarks/*.ts',
-    ],
-    rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-restricted-syntax': 'off',
-    },
-  },
-  {
     files: ['packages/statemanager/src/**', 'packages/vm/src/**'],
     rules: {
       'no-invalid-this': 'off',
@@ -197,16 +182,6 @@ export default [
           message: 'Usage of assert.notOk is forbidden because it relies on falseness.',
         },
       ],
-    },
-  },
-  {
-    files: [
-      'packages/vm/test/util.ts',
-      'packages/vm/test/tester/**/*.ts',
-      'packages/vm/examples/**/*.ts',
-    ],
-    rules: {
-      'no-console': 'off',
     },
   },
 ]
