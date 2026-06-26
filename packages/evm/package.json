@@ -44,6 +44,7 @@
     "spellcheck:md": "npx cspell --gitignore -c ../../config/cspell-md.json \"**.md\" --cache --show-suggestions --show-context",
     "spellcheck:ts": "npx cspell --gitignore -c ../../config/cspell-ts.json \"./**/*.ts\" --cache --show-suggestions --show-context",
     "test": "npm run test:qrl",
+    "test:node": "npm run test:qrl",
     "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts",
     "tsc": "../../config/cli/ts-compile.sh",
     "visualize:bundle": "npx vite build --config=./vite.config.bundler.ts --emptyOutDir=false --outDir ."

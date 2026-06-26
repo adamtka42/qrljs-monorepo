@@ -40,6 +40,7 @@
     "lint:fix": "npm run biome:fix && eslint  --fix --config ./eslint.config.mjs .",
     "prepublishOnly": "../../config/cli/prepublish.sh && npm run test:node",
     "test": "npm run test:qrl",
+    "test:node": "npm run test:qrl",
     "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts",
     "tsc": "../../config/cli/ts-compile.sh"
   },
