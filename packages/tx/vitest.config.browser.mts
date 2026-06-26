@@ -7,11 +7,8 @@ export default mergeConfig(
     test: {
       exclude: [
         ...configDefaults.exclude,
-        // default export for minimist
-        'test/transactionRunner.spec.ts',
-        'test/eip4844.spec.ts',
-        'test/eip7594.spec.ts',
-        'test/t9n.spec.ts',
+        // The QRL transaction tests are validated in the node environment.
+        'test/qrl/**/*.spec.ts',
       ],
     },
   }),

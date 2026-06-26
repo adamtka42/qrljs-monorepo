@@ -21,9 +21,6 @@ const config = defineConfig({
   resolve: {
     conditions: ['typescript'],
   },
-  optimizeDeps: {
-    exclude: ['kzg-wasm'],
-  },
 })
 
 export default config
