@@ -1,9 +1,9 @@
-import { bigIntToUnpaddedBytes, bytesToHex, hexToBytes } from '@ethereumjs/util'
+import { bigIntToUnpaddedBytes, bytesToHex, hexToBytes } from '@theqrl/util'
 
 import { QRL_HASH_BYTES, QRL_LOGS_BLOOM_BYTES, QRL_LOG_TOPIC_BYTES } from './constants.ts'
 import { qrlBlockError } from './errors.ts'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 export type QRLJSONHex = PrefixedHexString
 

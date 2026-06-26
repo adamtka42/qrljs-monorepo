@@ -1,6 +1,6 @@
-import type { qrl as blockQrl } from '@ethereumjs/block'
-import type { qrl as stateQrl } from '@ethereumjs/statemanager'
-import type { qrl as txQrl } from '@ethereumjs/tx'
+import type { qrl as blockQrl } from '@theqrl/block'
+import type { qrl as stateQrl } from '@theqrl/statemanager'
+import type { qrl as txQrl } from '@theqrl/tx'
 import type { QRLRunTxResult } from './result.ts'
 
 export type QRLChainSnapshotId = bigint

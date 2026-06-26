@@ -5,7 +5,7 @@ Minimal byte, error, hex, bigint, and QRL 64-byte address utilities used by the 
 ## Usage
 
 ```ts
-import { qrl, hexToBytes, bytesToHex } from '@ethereumjs/util'
+import { qrl, hexToBytes, bytesToHex } from '@theqrl/util'
 
 const address = qrl.QRLAddress.zero()
 ```
@@ -15,11 +15,11 @@ const address = qrl.QRLAddress.zero()
 Run package tests with:
 
 ```sh
-npm test --workspace @ethereumjs/util
+npm test --workspace @theqrl/util
 ```
 
 Run type checks with:
 
 ```sh
-npm run tsc --workspace @ethereumjs/util
+npm run tsc --workspace @theqrl/util
 ```

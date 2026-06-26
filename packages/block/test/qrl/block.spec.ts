@@ -1,7 +1,7 @@
-import { MerklePatriciaTrie } from '@ethereumjs/mpt'
-import { RLP } from '@ethereumjs/rlp'
-import { qrl as txQrl } from '@ethereumjs/tx'
-import { bytesToHex, concatBytes, qrl as utilQrl } from '@ethereumjs/util'
+import { MerklePatriciaTrie } from '@theqrl/mpt'
+import { RLP } from '@theqrl/rlp'
+import { qrl as txQrl } from '@theqrl/tx'
+import { bytesToHex, concatBytes, qrl as utilQrl } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
 import { qrl } from '../../src/index.ts'

@@ -5,7 +5,7 @@ Local in-memory QRL VM/provider layer built on QRL block, transaction, state-man
 ## Usage
 
 ```ts
-import { qrl } from '@ethereumjs/vm'
+import { qrl } from '@theqrl/vm'
 
 const vm = new qrl.QRLVM()
 ```
@@ -15,11 +15,11 @@ const vm = new qrl.QRLVM()
 Run package tests with:
 
 ```sh
-npm test --workspace @ethereumjs/vm
+npm test --workspace @theqrl/vm
 ```
 
 Run type checks with:
 
 ```sh
-npm run tsc --workspace @ethereumjs/vm
+npm run tsc --workspace @theqrl/vm
 ```

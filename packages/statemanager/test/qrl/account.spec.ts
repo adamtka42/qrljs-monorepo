@@ -1,9 +1,9 @@
-import { equalsBytes, hexToBytes } from '@ethereumjs/util'
+import { equalsBytes, hexToBytes } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
 import { qrl as stateQrl } from '../../src/index.ts'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 describe('QRLAccount', () => {
   it('creates an empty QRL account with QRL empty hashes', () => {

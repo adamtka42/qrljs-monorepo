@@ -1,6 +1,6 @@
-import { hexToBytes } from '@ethereumjs/util'
+import { hexToBytes } from '@theqrl/util'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 export const QRL_STATE_NONCE_MAX = 2n ** 64n - 1n
 export const QRL_STORAGE_KEY_BYTES = 32

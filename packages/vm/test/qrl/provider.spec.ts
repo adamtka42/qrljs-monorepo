@@ -1,4 +1,4 @@
-import { qrl as utilQrl } from '@ethereumjs/util'
+import { qrl as utilQrl } from '@theqrl/util'
 import { assert, describe, expect, it } from 'vitest'
 
 import { qrl } from '../../src/index.ts'

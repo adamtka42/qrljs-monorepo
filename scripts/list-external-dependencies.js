@@ -71,7 +71,7 @@ function logDependencies(type, map) {
 
 const BASE_PATH = join(__dirname, '..', 'packages')
 const WHITELIST = [
-  '@ethereumjs',
+  '@theqrl',
   '@noble',
   '@scure',
   '@types',

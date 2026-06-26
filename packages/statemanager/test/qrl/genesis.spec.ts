@@ -1,9 +1,9 @@
-import { hexToBytes, qrl as utilQrl } from '@ethereumjs/util'
+import { hexToBytes, qrl as utilQrl } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
 import { qrl as stateQrl } from '../../src/index.ts'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 const ADDRESS = utilQrl.QRLAddress.fromBytes(new Uint8Array(64).fill(0x11)).toString()
 

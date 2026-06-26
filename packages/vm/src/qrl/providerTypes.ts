@@ -1,6 +1,6 @@
-import type { qrl as blockQrl } from '@ethereumjs/block'
-import type { qrl as txQrl } from '@ethereumjs/tx'
-import type { qrl } from '@ethereumjs/util'
+import type { qrl as blockQrl } from '@theqrl/block'
+import type { qrl as txQrl } from '@theqrl/tx'
+import type { qrl } from '@theqrl/util'
 
 import type { QRLRunTxContext } from './context.ts'
 import type { QRLLocalChain } from './localChain.ts'

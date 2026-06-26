@@ -1,12 +1,12 @@
-import { RLP } from '@ethereumjs/rlp'
 import { keccak_512, shake256 } from '@noble/hashes/sha3.js'
+import { RLP } from '@theqrl/rlp'
 
 import { bytesToHex, equalsBytes, hexToBytes } from '../bytes.ts'
 import { QRLJSErrorWithoutCode } from '../errors.ts'
 
 import { QRL_ADDRESS_BYTES, QRL_ADDRESS_HEX_LENGTH, QRL_ADDRESS_PREFIX } from './constants.ts'
 
-import type { Input } from '@ethereumjs/rlp'
+import type { Input } from '@theqrl/rlp'
 import type { PrefixedHexString } from '../types.ts'
 
 const QRL_ADDRESS_RE = new RegExp(`^${QRL_ADDRESS_PREFIX}[0-9a-fA-F]{${QRL_ADDRESS_HEX_LENGTH}}$`)

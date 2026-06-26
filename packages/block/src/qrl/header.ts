@@ -1,6 +1,6 @@
-import { RLP } from '@ethereumjs/rlp'
-import { qrl } from '@ethereumjs/util'
 import { keccak_256 } from '@noble/hashes/sha3.js'
+import { RLP } from '@theqrl/rlp'
+import { qrl } from '@theqrl/util'
 
 import { qrlBlockError } from './errors.ts'
 import {
@@ -17,7 +17,7 @@ import {
   validateHash,
 } from './utils.ts'
 
-import type { Input } from '@ethereumjs/rlp'
+import type { Input } from '@theqrl/rlp'
 import type { QRLJSONHex } from './utils.ts'
 
 export interface QRLBlockHeaderData {

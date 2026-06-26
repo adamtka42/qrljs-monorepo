@@ -6,8 +6,7 @@ and release helper behavior.
 ## Monorepo
 
 The project uses npm workspaces to manage the active packages under `packages/`.
-The current package names still use the upstream `@ethereumjs/*` scope until the
-coordinated package rename stage is done.
+Package names use the QRL `@theqrl/*` scope.
 
 ### Structure
 
@@ -33,7 +32,7 @@ Example for the VM package:
 cd packages/vm
 npm run test
 npx vitest test/qrl/localVm.spec.ts
-npm run build --workspace=@ethereumjs/vm
+npm run build --workspace=@theqrl/vm
 ```
 
 ## Releases
@@ -45,9 +44,7 @@ tsx scripts/release-npm.ts [--bump-version=<version>] [--publish=<tag>] [--scope
 tsx scripts/release-github.ts --version=<version> [--start-with=<package>]
 ```
 
-The npm release script still defaults to the current `@ethereumjs/*` package scope.
-Use `--scope=<scope>` only for an explicit fork-style publish. A future package
-rename stage should update the default scope and all internal imports together.
+The npm release script defaults to the `@theqrl/*` package scope. Use `--scope=<scope>` only for an explicit fork-style publish.
 
 Package changelogs are not maintained in this QRL-focused repository. GitHub release
 notes are generated from package metadata by default. For richer notes, add an
@@ -116,14 +113,14 @@ npm run build
 npm link
 
 cd path/to/consumer
-npm link @ethereumjs/vm
+npm link @theqrl/vm
 ```
 
 When done:
 
 ```sh
 cd path/to/consumer
-npm unlink --no-save @ethereumjs/vm
+npm unlink --no-save @theqrl/vm
 
 cd /path/to/qrljs-monorepo/packages/vm
 npm unlink

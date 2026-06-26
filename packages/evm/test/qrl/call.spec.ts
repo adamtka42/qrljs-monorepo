@@ -1,5 +1,5 @@
-import { qrl as stateQrl } from '@ethereumjs/statemanager'
-import { qrl as utilQrl } from '@ethereumjs/util'
+import { qrl as stateQrl } from '@theqrl/statemanager'
+import { qrl as utilQrl } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
 import { qrl } from '../../src/index.ts'

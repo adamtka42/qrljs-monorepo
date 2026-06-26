@@ -1,13 +1,13 @@
-import { MerklePatriciaTrie } from '@ethereumjs/mpt'
-import { RLP } from '@ethereumjs/rlp'
-import { qrl as txQrl } from '@ethereumjs/tx'
-import { concatBytes } from '@ethereumjs/util'
+import { MerklePatriciaTrie } from '@theqrl/mpt'
+import { RLP } from '@theqrl/rlp'
+import { qrl as txQrl } from '@theqrl/tx'
+import { concatBytes } from '@theqrl/util'
 
 import { type QRLLog } from './log.ts'
 import { type QRLReceipt } from './receipt.ts'
 import { bigintToRLP, qrlEmptyRootHash } from './utils.ts'
 
-import type { Input } from '@ethereumjs/rlp'
+import type { Input } from '@theqrl/rlp'
 
 export async function genQRLTransactionsRoot(
   transactions: readonly txQrl.QRLDynamicFeeTransaction[],

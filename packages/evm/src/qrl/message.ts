@@ -1,4 +1,4 @@
-import { qrl } from '@ethereumjs/util'
+import { qrl } from '@theqrl/util'
 
 export interface QRLExecutionContext {
   origin: qrl.QRLAddress

@@ -1,4 +1,4 @@
-import { bytesToHex } from '@ethereumjs/util'
+import { bytesToHex } from '@theqrl/util'
 
 export function qrlLookupKey(bytes: Uint8Array): string {
   return bytesToHex(bytes).toLowerCase()

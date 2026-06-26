@@ -1,5 +1,5 @@
-import { qrl as stateQrl } from '@ethereumjs/statemanager'
-import type { qrl } from '@ethereumjs/util'
+import { qrl as stateQrl } from '@theqrl/statemanager'
+import type { qrl } from '@theqrl/util'
 
 import { QRLInterpreter, type QRLWarmStorageAccess } from './interpreter.ts'
 import { type QRLExecutionContext, QRLMessage, defaultQRLExecutionContext } from './message.ts'

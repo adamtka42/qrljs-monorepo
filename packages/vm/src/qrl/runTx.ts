@@ -1,7 +1,7 @@
-import { qrl as evmQrl } from '@ethereumjs/evm'
-import type { qrl as stateQrl } from '@ethereumjs/statemanager'
-import type { qrl as txQrl } from '@ethereumjs/tx'
-import { qrl } from '@ethereumjs/util'
+import { qrl as evmQrl } from '@theqrl/evm'
+import type { qrl as stateQrl } from '@theqrl/statemanager'
+import type { qrl as txQrl } from '@theqrl/tx'
+import { qrl } from '@theqrl/util'
 
 import { createQRLContractAddress } from './address.ts'
 import { type NormalizedQRLRunTxContext, type QRLRunTxContext } from './context.ts'

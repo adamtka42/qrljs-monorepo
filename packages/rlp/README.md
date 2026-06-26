@@ -5,7 +5,7 @@ RLP encoding and decoding helpers retained as a generic serialization dependency
 ## Usage
 
 ```ts
-import { RLP } from '@ethereumjs/rlp'
+import { RLP } from '@theqrl/rlp'
 
 const encoded = RLP.encode([new Uint8Array([1])])
 ```
@@ -15,11 +15,11 @@ const encoded = RLP.encode([new Uint8Array([1])])
 Run package tests with:
 
 ```sh
-npm test --workspace @ethereumjs/rlp
+npm test --workspace @theqrl/rlp
 ```
 
 Run type checks with:
 
 ```sh
-npm run tsc --workspace @ethereumjs/rlp
+npm run tsc --workspace @theqrl/rlp
 ```

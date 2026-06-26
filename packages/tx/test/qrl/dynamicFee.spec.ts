@@ -1,10 +1,10 @@
 import { assert, describe, it } from 'vitest'
 
-import { bytesToHex, hexToBytes, qrl as qrlUtil } from '@ethereumjs/util'
+import { bytesToHex, hexToBytes, qrl as qrlUtil } from '@theqrl/util'
 
 import { qrl } from '../../src/index.ts'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 describe('QRLDynamicFeeTransaction', () => {
   const ADDRESS =

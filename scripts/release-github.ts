@@ -148,7 +148,7 @@ async function createGitHubRelease(
   version: string,
   releaseNotes: string
 ): Promise<boolean> {
-  const fullPackageName = `@ethereumjs/${packageName}`
+  const fullPackageName = `@theqrl/${packageName}`
   const tag = `${fullPackageName}@${version}`
   const title = `${fullPackageName} v${version}`
 

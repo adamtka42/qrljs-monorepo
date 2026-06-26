@@ -1,9 +1,9 @@
-import { hexToBytes, qrl as utilQrl } from '@ethereumjs/util'
+import { hexToBytes, qrl as utilQrl } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
 import { qrl } from '../../src/index.ts'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 const SENDER =
   'Q11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111'

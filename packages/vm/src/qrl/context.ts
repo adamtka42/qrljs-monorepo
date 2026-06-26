@@ -1,4 +1,4 @@
-import type { qrl } from '@ethereumjs/util'
+import type { qrl } from '@theqrl/util'
 
 export interface QRLRunTxContext {
   chainId: bigint

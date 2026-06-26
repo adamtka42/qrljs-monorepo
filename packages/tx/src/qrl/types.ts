@@ -1,4 +1,4 @@
-import type { qrl } from '@ethereumjs/util'
+import type { qrl } from '@theqrl/util'
 
 import type { QRLAccessList } from './access.ts'
 

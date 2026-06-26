@@ -1,4 +1,4 @@
-import { qrl as blockQrl } from '@ethereumjs/block'
+import { qrl as blockQrl } from '@theqrl/block'
 
 import type { QRLRunTxResult } from './result.ts'
 

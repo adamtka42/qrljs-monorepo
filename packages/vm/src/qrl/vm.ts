@@ -1,5 +1,5 @@
-import type { qrl as evmQrl } from '@ethereumjs/evm'
-import type { qrl as stateQrl } from '@ethereumjs/statemanager'
+import type { qrl as evmQrl } from '@theqrl/evm'
+import type { qrl as stateQrl } from '@theqrl/statemanager'
 
 import { type QRLRunTxContext } from './context.ts'
 import { QRLLocalChain } from './localChain.ts'

@@ -1,5 +1,5 @@
 {
-  "name": "@ethereumjs/rlp",
+  "name": "@theqrl/rlp",
   "version": "10.1.2",
   "description": "Recursive Length Prefix encoding helper retained for QRL serialization",
   "keywords": ["qrl", "rlp", "serialization"],

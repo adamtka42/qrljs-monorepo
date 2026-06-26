@@ -1,4 +1,4 @@
-import type { qrl } from '@ethereumjs/util'
+import type { qrl } from '@theqrl/util'
 import type { QRLDynamicFeeTransaction } from './dynamicFee.ts'
 
 export interface QRLAuthValues {

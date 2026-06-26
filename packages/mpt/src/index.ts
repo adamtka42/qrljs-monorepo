@@ -1,8 +1,8 @@
-import { RLP } from '@ethereumjs/rlp'
-import { bytesToHex, hexToBytes } from '@ethereumjs/util'
 import { keccak_256 } from '@noble/hashes/sha3.js'
+import { RLP } from '@theqrl/rlp'
+import { bytesToHex, hexToBytes } from '@theqrl/util'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 const EMPTY_TRIE_ROOT = hexToBytes(
   '0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421' as PrefixedHexString,

@@ -1,5 +1,5 @@
-import type { qrl } from '@ethereumjs/util'
-import { QRLJSErrorWithoutCode } from '@ethereumjs/util'
+import type { qrl } from '@theqrl/util'
+import { QRLJSErrorWithoutCode } from '@theqrl/util'
 
 import { QRL_DYNAMIC_FEE_TX_TYPE } from './constants.ts'
 import { QRLDynamicFeeTransaction } from './dynamicFee.ts'

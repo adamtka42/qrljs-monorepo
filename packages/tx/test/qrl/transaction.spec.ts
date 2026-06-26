@@ -1,6 +1,6 @@
 import { assert, describe, it } from 'vitest'
 
-import { bytesToHex } from '@ethereumjs/util'
+import { bytesToHex } from '@theqrl/util'
 
 import { qrl } from '../../src/index.ts'
 

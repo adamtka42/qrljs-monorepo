@@ -1,4 +1,4 @@
-import type { qrl as txQrl } from '@ethereumjs/tx'
+import type { qrl as txQrl } from '@theqrl/tx'
 
 import { createQRLReceiptsBloom } from './bloom.ts'
 import { QRLBlockHeader, type QRLBlockHeaderData, type QRLBlockHeaderJSON } from './header.ts'

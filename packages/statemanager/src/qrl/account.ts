@@ -1,4 +1,4 @@
-import { QRLJSErrorWithoutCode, equalsBytes } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode, equalsBytes } from '@theqrl/util'
 
 import {
   QRL_EMPTY_CODE_HASH,

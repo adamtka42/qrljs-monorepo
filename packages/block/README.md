@@ -5,7 +5,7 @@ QRL block, header, receipt, log, bloom, and local transaction/receipt root helpe
 ## Usage
 
 ```ts
-import { qrl } from '@ethereumjs/block'
+import { qrl } from '@theqrl/block'
 
 const header = new qrl.QRLBlockHeader({ number: 1n })
 const block = new qrl.QRLBlock({ header })
@@ -16,11 +16,11 @@ const block = new qrl.QRLBlock({ header })
 Run package tests with:
 
 ```sh
-npm test --workspace @ethereumjs/block
+npm test --workspace @theqrl/block
 ```
 
 Run type checks with:
 
 ```sh
-npm run tsc --workspace @ethereumjs/block
+npm run tsc --workspace @theqrl/block
 ```

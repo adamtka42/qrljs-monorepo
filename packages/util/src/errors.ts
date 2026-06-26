@@ -4,7 +4,7 @@ import {
   type QRLJSErrorMetaData,
   type QRLJSErrorObject,
   QRLJSErrorWithoutCode,
-} from '@ethereumjs/rlp'
+} from '@theqrl/rlp'
 
 export {
   DEFAULT_ERROR_CODE,

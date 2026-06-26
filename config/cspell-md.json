@@ -338,6 +338,7 @@
     "QRLEVM",
     "QRLVM",
     "QRVM",
-    "revertable"
+    "revertable",
+    "theqrl"
   ]
 }

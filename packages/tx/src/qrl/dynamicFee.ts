@@ -1,4 +1,5 @@
-import { RLP } from '@ethereumjs/rlp'
+import { keccak_256 } from '@noble/hashes/sha3.js'
+import { RLP } from '@theqrl/rlp'
 import {
   QRLJSErrorWithoutCode,
   bigIntToUnpaddedBytes,
@@ -6,8 +7,7 @@ import {
   bytesToHex,
   concatBytes,
   qrl,
-} from '@ethereumjs/util'
-import { keccak_256 } from '@noble/hashes/sha3.js'
+} from '@theqrl/util'
 
 import {
   type QRLAccessList,
@@ -17,7 +17,7 @@ import {
 } from './access.ts'
 import { QRL_DESCRIPTOR_BYTES, QRL_DYNAMIC_FEE_TX_TYPE } from './constants.ts'
 
-import type { Input } from '@ethereumjs/rlp'
+import type { Input } from '@theqrl/rlp'
 import type { NormalizedQRLDynamicFeeTxData, QRLDynamicFeeTxData } from './types.ts'
 
 type QRLDynamicFeeTxRaw = [

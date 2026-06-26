@@ -1,4 +1,4 @@
-import { QRLJSErrorWithoutCode, equalsBytes } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode, equalsBytes } from '@theqrl/util'
 
 import { QRL_STORAGE_KEY_BYTES, QRL_STORAGE_VALUE_BYTES } from './constants.ts'
 

@@ -1,4 +1,4 @@
-import { QRLJSErrorWithoutCode, qrl } from '@ethereumjs/util'
+import { QRLJSErrorWithoutCode, qrl } from '@theqrl/util'
 
 export interface QRLAccessTuple {
   address: qrl.QRLAddress

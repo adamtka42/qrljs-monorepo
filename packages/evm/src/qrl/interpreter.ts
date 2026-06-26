@@ -1,6 +1,6 @@
-import type { qrl as stateQrl } from '@ethereumjs/statemanager'
-import { qrl } from '@ethereumjs/util'
 import { keccak_256 } from '@noble/hashes/sha3.js'
+import type { qrl as stateQrl } from '@theqrl/statemanager'
+import { qrl } from '@theqrl/util'
 
 import { QRLVMError, QRLVMRevert } from './errors.ts'
 import {

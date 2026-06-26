@@ -34,7 +34,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { execSync } from 'child_process'
 
-const DEFAULT_SCOPE = 'ethereumjs'
+const DEFAULT_SCOPE = 'theqrl'
 
 // Active packages from README.md (version + dependencies updated, published)
 const ACTIVE_PACKAGES = [
@@ -191,7 +191,7 @@ function updatePackages(
 }
 
 /**
- * Rewrites all `@ethereumjs/` references to `@<targetScope>/` across source,
+ * Rewrites all `@theqrl/` references to `@<targetScope>/` across source,
  * compiled output, and type declarations for each active package.
  */
 function rewriteImports(packages: PackageInfo[], targetScope: string): void {
@@ -396,7 +396,7 @@ async function main(): Promise<void> {
 
     // Step 1: For fork releases, build all packages FIRST under the original
     // scope so TypeScript can resolve monorepo-internal dependencies.
-    // After this, dist/ contains compiled output with @ethereumjs/ imports.
+    // After this, dist/ contains compiled output with @theqrl/ imports.
     if (isFork && tag) {
       buildPackages(packages)
     }

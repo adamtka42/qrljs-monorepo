@@ -1,5 +1,5 @@
-import { qrl as txQrl } from '@ethereumjs/tx'
-import { hexToBytes, qrl } from '@ethereumjs/util'
+import { qrl as txQrl } from '@theqrl/tx'
+import { hexToBytes, qrl } from '@theqrl/util'
 
 import { type QRLRunTxContext } from './context.ts'
 import { QRLLocalChain } from './localChain.ts'
@@ -17,7 +17,7 @@ import type {
   QRLProviderTransactionRequest,
 } from './providerTypes.ts'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 
 const DEFAULT_GAS_LIMIT = 30_000_000n
 const DEFAULT_CHAIN_ID = 1n

@@ -1,5 +1,5 @@
 {
-  "name": "@ethereumjs/vm",
+  "name": "@theqrl/vm",
   "version": "10.1.2",
   "description": "QRL local VM, provider formatting, block execution, and chain snapshots",
   "keywords": ["qrl", "vm", "local-chain"],
@@ -45,11 +45,11 @@
     "tsc": "../../config/cli/ts-compile.sh"
   },
   "dependencies": {
-    "@ethereumjs/block": "^10.1.2",
-    "@ethereumjs/evm": "^10.1.2",
-    "@ethereumjs/statemanager": "^10.1.2",
-    "@ethereumjs/tx": "^10.1.2",
-    "@ethereumjs/util": "^10.1.2"
+    "@theqrl/block": "^10.1.2",
+    "@theqrl/evm": "^10.1.2",
+    "@theqrl/statemanager": "^10.1.2",
+    "@theqrl/tx": "^10.1.2",
+    "@theqrl/util": "^10.1.2"
   },
   "devDependencies": {},
   "engines": {

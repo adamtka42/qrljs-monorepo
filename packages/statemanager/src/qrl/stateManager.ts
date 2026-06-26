@@ -1,10 +1,10 @@
-import { QRLJSErrorWithoutCode, bytesToHex, hexToBytes, qrl } from '@ethereumjs/util'
 import { keccak_256 } from '@noble/hashes/sha3.js'
+import { QRLJSErrorWithoutCode, bytesToHex, hexToBytes, qrl } from '@theqrl/util'
 
 import { QRLAccount, normalizeBalance, normalizeNonce } from './account.ts'
 import { assertQRLStorageKey, assertQRLStorageValue, emptyQRLStorageValue } from './storage.ts'
 
-import type { PrefixedHexString } from '@ethereumjs/util'
+import type { PrefixedHexString } from '@theqrl/util'
 import type { QRLGenesisState } from './genesis.ts'
 
 interface QRLStateLayer {

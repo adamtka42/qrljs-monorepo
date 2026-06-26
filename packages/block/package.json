@@ -1,5 +1,5 @@
 {
-  "name": "@ethereumjs/block",
+  "name": "@theqrl/block",
   "version": "10.1.2",
   "description": "QRL block, header, log, receipt, and root helpers",
   "keywords": ["qrl", "block"],
@@ -47,11 +47,11 @@
     "tsc": "../../config/cli/ts-compile.sh"
   },
   "dependencies": {
-    "@ethereumjs/mpt": "^10.1.2",
-    "@ethereumjs/rlp": "^10.1.2",
-    "@ethereumjs/tx": "^10.1.2",
-    "@ethereumjs/util": "^10.1.2",
-    "@noble/hashes": "^2.0.1"
+    "@noble/hashes": "^2.0.1",
+    "@theqrl/mpt": "^10.1.2",
+    "@theqrl/rlp": "^10.1.2",
+    "@theqrl/tx": "^10.1.2",
+    "@theqrl/util": "^10.1.2"
   },
   "devDependencies": {},
   "engines": {

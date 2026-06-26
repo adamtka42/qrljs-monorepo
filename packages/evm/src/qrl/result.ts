@@ -1,4 +1,4 @@
-import type { qrl } from '@ethereumjs/util'
+import type { qrl } from '@theqrl/util'
 
 import type { QRLVMError } from './errors.ts'
 import type { QRLStack } from './stack.ts'

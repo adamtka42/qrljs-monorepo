@@ -5,7 +5,7 @@ In-memory QRL execution components: interpreter, stack, memory, gas accounting, 
 ## Usage
 
 ```ts
-import { qrl } from '@ethereumjs/evm'
+import { qrl } from '@theqrl/evm'
 
 const evm = new qrl.QRLEVM()
 ```
@@ -15,11 +15,11 @@ const evm = new qrl.QRLEVM()
 Run package tests with:
 
 ```sh
-npm test --workspace @ethereumjs/evm
+npm test --workspace @theqrl/evm
 ```
 
 Run type checks with:
 
 ```sh
-npm run tsc --workspace @ethereumjs/evm
+npm run tsc --workspace @theqrl/evm
 ```

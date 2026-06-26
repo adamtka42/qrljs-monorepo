@@ -5,7 +5,7 @@ Minimal local trie-root helper used by QRL block root generation. It intentional
 ## Usage
 
 ```ts
-import { MerklePatriciaTrie } from '@ethereumjs/mpt'
+import { MerklePatriciaTrie } from '@theqrl/mpt'
 
 const trie = new MerklePatriciaTrie()
 await trie.put(new Uint8Array([0]), new Uint8Array([1]))
@@ -17,11 +17,11 @@ const root = trie.root()
 Run package tests with:
 
 ```sh
-npm test --workspace @ethereumjs/mpt
+npm test --workspace @theqrl/mpt
 ```
 
 Run type checks with:
 
 ```sh
-npm run tsc --workspace @ethereumjs/mpt
+npm run tsc --workspace @theqrl/mpt
 ```

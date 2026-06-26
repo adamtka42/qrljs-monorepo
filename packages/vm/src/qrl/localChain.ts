@@ -1,8 +1,8 @@
-import { qrl as blockQrl } from '@ethereumjs/block'
-import { qrl as evmQrl } from '@ethereumjs/evm'
-import { qrl as stateQrl } from '@ethereumjs/statemanager'
-import type { qrl as txQrl } from '@ethereumjs/tx'
-import { qrl } from '@ethereumjs/util'
+import { qrl as blockQrl } from '@theqrl/block'
+import { qrl as evmQrl } from '@theqrl/evm'
+import { qrl as stateQrl } from '@theqrl/statemanager'
+import type { qrl as txQrl } from '@theqrl/tx'
+import { qrl } from '@theqrl/util'
 
 import { cloneQRLMap, qrlLookupKey, qrlNumberKey } from './blockLookup.ts'
 import { type QRLRunTxContext } from './context.ts'

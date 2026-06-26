@@ -9,21 +9,20 @@ support, QRL transactions, blocks, state management, EVM-like execution, and the
 local VM/provider layer.
 
 Ethereum-specific packages that are not part of the QRL local execution path have
-been removed from the workspace. Package names and internal imports still use the
-upstream `@ethereumjs/*` scope until the coordinated package rename stage is done.
+been removed from the workspace. Package names and internal imports use the QRL `@theqrl/*` scope.
 
 ## Active Packages
 
 | Package | Purpose |
 | ------- | ------- |
-| [`@ethereumjs/block`](./packages/block) | QRL block, header, log, receipt, and root helpers. |
-| [`@ethereumjs/evm`](./packages/evm) | QRL EVM-like bytecode interpreter and execution primitives. |
-| [`@ethereumjs/mpt`](./packages/mpt) | Minimal deterministic trie-root helper used by QRL local execution. |
-| [`@ethereumjs/rlp`](./packages/rlp) | RLP encoder/decoder retained as a generic serialization helper. |
-| [`@ethereumjs/statemanager`](./packages/statemanager) | In-memory QRL account, storage, and genesis state manager. |
-| [`@ethereumjs/tx`](./packages/tx) | QRL transaction construction, serialization, and signing helpers. |
-| [`@ethereumjs/util`](./packages/util) | Generic byte helpers and QRL address utilities. |
-| [`@ethereumjs/vm`](./packages/vm) | QRL local VM, provider formatting, block execution, and chain snapshots. |
+| [`@theqrl/block`](./packages/block) | QRL block, header, log, receipt, and root helpers. |
+| [`@theqrl/evm`](./packages/evm) | QRL EVM-like bytecode interpreter and execution primitives. |
+| [`@theqrl/mpt`](./packages/mpt) | Minimal deterministic trie-root helper used by QRL local execution. |
+| [`@theqrl/rlp`](./packages/rlp) | RLP encoder/decoder retained as a generic serialization helper. |
+| [`@theqrl/statemanager`](./packages/statemanager) | In-memory QRL account, storage, and genesis state manager. |
+| [`@theqrl/tx`](./packages/tx) | QRL transaction construction, serialization, and signing helpers. |
+| [`@theqrl/util`](./packages/util) | Generic byte helpers and QRL address utilities. |
+| [`@theqrl/vm`](./packages/vm) | QRL local VM, provider formatting, block execution, and chain snapshots. |
 
 ## Getting Started
 

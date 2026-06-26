@@ -1,6 +1,6 @@
-import { qrl as blockQrl } from '@ethereumjs/block'
-import { qrl as txQrl } from '@ethereumjs/tx'
-import { qrl as utilQrl } from '@ethereumjs/util'
+import { qrl as blockQrl } from '@theqrl/block'
+import { qrl as txQrl } from '@theqrl/tx'
+import { qrl as utilQrl } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
 import { qrl } from '../../src/index.ts'

@@ -1,5 +1,5 @@
-import type { qrl as evmQrl } from '@ethereumjs/evm'
-import type { qrl } from '@ethereumjs/util'
+import type { qrl as evmQrl } from '@theqrl/evm'
+import type { qrl } from '@theqrl/util'
 
 export interface QRLRunTxResult {
   txHash: Uint8Array
