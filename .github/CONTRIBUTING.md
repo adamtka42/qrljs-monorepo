@@ -1,9 +1,7 @@
 # Contributing
 
-Great that you want to contribute to the `EthereumJS` [ecosystem](https://ethereumjs.readthedocs.io/en/latest/introduction.html). `EthereumJS` is managed by the Ethereum Foundation and largely driven by the wider community. Everyone is welcome to join the effort and help to improve on the libraries (see our [Code of Conduct](https://ethereumjs.readthedocs.io/en/latest/code_of_conduct.html) 🌷).
+This repository contains the QRL JavaScript monorepo used for QRL-focused packages, local VM execution, provider support, and related tooling.
 
-We have written up some [Contribution Guidelines](https://ethereumjs.readthedocs.io/en/latest/contributing.html#how-to-start) to help you getting started.
+Please open focused issues or pull requests against the relevant package template, keep changes scoped, and run the applicable lint, typecheck, test, and build commands before submitting.
 
-These include information on how we work with **Git** and how our **general workflow** and **technical setup** looks like (stuff like language, tooling, code quality and style).
-
-Happy Coding! 👾 😀 💻
+For local development commands, see [DEVELOPER.md](../DEVELOPER.md).

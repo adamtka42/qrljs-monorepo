@@ -59,7 +59,7 @@ if [ -z "$FILESCHANGED" ]; then
     exit
 fi
 
-eslint --config ./eslint.config.mjs $FILESCHANGED
+eslint --no-warn-ignored --config ./eslint.config.mjs $FILESCHANGED
 
 RETURN_CODE=$?
 

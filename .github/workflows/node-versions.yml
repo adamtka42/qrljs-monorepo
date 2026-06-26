@@ -6,7 +6,6 @@ on:
 
 jobs:
   tests:
-    if: github.repository == 'ethereumjs/ethereumjs-monorepo'
     runs-on: ubuntu-latest
     strategy:
       matrix:
