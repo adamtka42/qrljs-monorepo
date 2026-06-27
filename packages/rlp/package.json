@@ -50,9 +50,15 @@
     "spellcheck:md": "npx cspell --gitignore -c ../../config/cspell-md.json \"**.md\" --cache --show-suggestions --show-context",
     "spellcheck:ts": "npx cspell --gitignore -c ../../config/cspell-ts.json \"./**/*.ts\" --cache --show-suggestions --show-context",
     "test": "echo \"No QRL tests for this package\"",
-    "tsc": "../../config/cli/ts-compile.sh"
+    "tsc": "../../config/cli/ts-compile.sh",
+    "benchmarks": "node ./benchmarks/index.js",
+    "build:benchmarks": "npm run build && tsc -p tsconfig.benchmarks.json"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/benchmark": "^2.1.5",
+    "benchmark": "^2.1.4"
   }
 }
