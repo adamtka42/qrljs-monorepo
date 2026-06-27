@@ -188,6 +188,7 @@ export class QRLLocalChain {
     const transactions = pending.map((entry) => entry.tx)
     const transactionsRoot = await blockQrl.genQRLTransactionsRoot(transactions)
     const receiptsRoot = await blockQrl.genQRLReceiptsRoot(receipts)
+    const stateRoot = await this.stateManager.getStateRoot()
 
     const draftBlock = new blockQrl.QRLBlock({
       header: {
@@ -199,6 +200,7 @@ export class QRLLocalChain {
         coinbase: options.coinbase ?? this.context?.coinbase ?? latest.header.coinbase,
         transactionsRoot,
         receiptsRoot,
+        stateRoot,
       },
       transactions,
       receipts,

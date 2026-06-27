@@ -1,8 +1,21 @@
 import { keccak_256 } from '@noble/hashes/sha3.js'
-import { QRLJSErrorWithoutCode, bytesToHex, hexToBytes, qrl } from '@theqrl/util'
+import { MerklePatriciaTrie } from '@theqrl/mpt'
+import { RLP } from '@theqrl/rlp'
+import {
+  QRLJSErrorWithoutCode,
+  bigIntToUnpaddedBytes,
+  bytesToHex,
+  hexToBytes,
+  qrl,
+} from '@theqrl/util'
 
 import { QRLAccount, normalizeBalance, normalizeNonce } from './account.ts'
-import { assertQRLStorageKey, assertQRLStorageValue, emptyQRLStorageValue } from './storage.ts'
+import {
+  assertQRLStorageKey,
+  assertQRLStorageValue,
+  emptyQRLStorageValue,
+  isEmptyQRLStorageValue,
+} from './storage.ts'
 
 import type { PrefixedHexString } from '@theqrl/util'
 import type { QRLGenesisState } from './genesis.ts'
@@ -132,6 +145,44 @@ export class QRLStateManager {
 
   public async clearStorage(address: qrl.QRLAddress): Promise<void> {
     this.topLayer().storage.delete(addressKey(address))
+  }
+
+  public async getStateRoot(): Promise<Uint8Array> {
+    const trie = new MerklePatriciaTrie()
+    const layer = this.topLayer()
+
+    for (const [addressHex, account] of [...layer.accounts.entries()].sort(([left], [right]) =>
+      left.localeCompare(right),
+    )) {
+      if (account === undefined) {
+        continue
+      }
+
+      const address = qrl.QRLAddress.fromHex(addressHex as PrefixedHexString)
+      const storageRoot = await this.getAccountStorageRoot(address)
+      const stateAccount = account.with({ storageRoot })
+      await trie.put(hexToBytes(addressHex as PrefixedHexString), encodeStateAccount(stateAccount))
+    }
+
+    return trie.root()
+  }
+
+  public async getAccountStorageRoot(address: qrl.QRLAddress): Promise<Uint8Array> {
+    const trie = new MerklePatriciaTrie()
+    const accountStorage = this.topLayer().storage.get(addressKey(address))
+    if (accountStorage === undefined) {
+      return trie.root()
+    }
+
+    for (const [key, value] of [...accountStorage.entries()].sort(([left], [right]) =>
+      left.localeCompare(right),
+    )) {
+      if (!isEmptyQRLStorageValue(value)) {
+        await trie.put(hexToBytes(key as PrefixedHexString), value)
+      }
+    }
+
+    return trie.root()
   }
 
   public async checkpoint(): Promise<void> {
@@ -269,4 +320,13 @@ function parseGenesisBytes(value: Uint8Array | string): Uint8Array {
     throw QRLJSErrorWithoutCode(`Invalid QRL genesis hex bytes=${value}`)
   }
   return hexToBytes(value as PrefixedHexString)
+}
+
+function encodeStateAccount(account: QRLAccount): Uint8Array {
+  return RLP.encode([
+    bigIntToUnpaddedBytes(account.nonce),
+    bigIntToUnpaddedBytes(account.balance),
+    account.storageRoot,
+    account.codeHash,
+  ])
 }

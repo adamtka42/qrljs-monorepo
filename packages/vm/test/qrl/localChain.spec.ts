@@ -49,6 +49,14 @@ describe('QRLLocalChain', () => {
       bytesToHex(result.block!.header.receiptsRoot),
       bytesToHex(await blockQrl.genQRLReceiptsRoot(result.block!.receipts)),
     )
+    assert.strictEqual(
+      bytesToHex(result.block!.header.stateRoot),
+      bytesToHex(await chain.stateManager.getStateRoot()),
+    )
+    assert.notStrictEqual(
+      bytesToHex(result.block!.header.stateRoot),
+      bytesToHex(new Uint8Array(32)),
+    )
   })
 
   it('stores pending transactions when mining is disabled and mines them later', async () => {
