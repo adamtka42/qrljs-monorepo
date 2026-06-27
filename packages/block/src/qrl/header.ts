@@ -7,7 +7,6 @@ import {
   bigintToRLP,
   copyBytes,
   hex,
-  optionalHex,
   optionalQuantity,
   qrlEmptyRootHash,
   qrlZeroBloom,
@@ -51,7 +50,7 @@ export interface QRLBlockHeaderJSON {
   extraData: QRLJSONHex
   prevRandao: QRLJSONHex
   baseFeePerGas?: QRLJSONHex
-  withdrawalsRoot?: QRLJSONHex
+  withdrawalsRoot: QRLJSONHex
   hash: QRLJSONHex
 }
 
@@ -69,7 +68,7 @@ export class QRLBlockHeader {
   public readonly logsBloom: Uint8Array
   public readonly random: Uint8Array
   public readonly extraData: Uint8Array
-  public readonly withdrawalsRoot?: Uint8Array
+  public readonly withdrawalsRoot: Uint8Array
 
   private readonly cachedHash: Uint8Array
 
@@ -96,10 +95,10 @@ export class QRLBlockHeader {
         : validateBloom('QRL header logsBloom', data.logsBloom)
     this.random = validateHash('QRL header random', data.random ?? qrlZeroHash())
     this.extraData = copyBytes(data.extraData ?? new Uint8Array(0))
-    this.withdrawalsRoot =
-      data.withdrawalsRoot === undefined
-        ? undefined
-        : validateHash('QRL header withdrawalsRoot', data.withdrawalsRoot)
+    this.withdrawalsRoot = validateHash(
+      'QRL header withdrawalsRoot',
+      data.withdrawalsRoot ?? qrlEmptyRootHash(),
+    )
 
     for (const [name, value] of [
       ['number', this.number],
@@ -133,9 +132,7 @@ export class QRLBlockHeader {
       this.random,
       bigintToRLP(this.baseFee),
     ]
-    if (this.withdrawalsRoot !== undefined) {
-      fields.push(this.withdrawalsRoot)
-    }
+    fields.push(this.withdrawalsRoot)
     return fields
   }
 
@@ -158,7 +155,7 @@ export class QRLBlockHeader {
       extraData: hex(this.extraData),
       prevRandao: hex(this.random),
       baseFeePerGas: optionalQuantity(this.baseFee),
-      withdrawalsRoot: optionalHex(this.withdrawalsRoot),
+      withdrawalsRoot: hex(this.withdrawalsRoot),
       hash: hex(this.cachedHash),
     }
   }

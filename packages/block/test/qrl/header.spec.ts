@@ -26,6 +26,11 @@ describe('QRLBlockHeader', () => {
       first.toJSON().receiptsRoot,
       '0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421',
     )
+    assert.strictEqual(
+      first.toJSON().withdrawalsRoot,
+      '0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421',
+    )
+    assert.strictEqual(first.raw().length, 14)
     assert.strictEqual(bytesToHex(first.hash()), bytesToHex(second.hash()))
     assert.notStrictEqual(bytesToHex(first.hash()), bytesToHex(firstHash))
   })
@@ -55,6 +60,7 @@ describe('QRLBlockHeader', () => {
   it('validates fixed-width fields', () => {
     assert.throws(() => new qrl.QRLBlockHeader({ parentHash: new Uint8Array(31) }))
     assert.throws(() => new qrl.QRLBlockHeader({ logsBloom: new Uint8Array(255) }))
+    assert.throws(() => new qrl.QRLBlockHeader({ withdrawalsRoot: new Uint8Array(31) }))
     assert.throws(() => new qrl.QRLBlockHeader({ number: -1n }))
   })
 })
