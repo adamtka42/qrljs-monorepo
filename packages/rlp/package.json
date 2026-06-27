@@ -49,10 +49,17 @@
     "spellcheck": "npm run spellcheck:ts && npm run spellcheck:md",
     "spellcheck:md": "npx cspell --gitignore -c ../../config/cspell-md.json \"**.md\" --cache --show-suggestions --show-context",
     "spellcheck:ts": "npx cspell --gitignore -c ../../config/cspell-ts.json \"./**/*.ts\" --cache --show-suggestions --show-context",
-    "test": "echo \"No QRL tests for this package\"",
-    "tsc": "../../config/cli/ts-compile.sh"
+    "test": "npm run test:node",
+    "tsc": "../../config/cli/ts-compile.sh",
+    "benchmarks": "node ./benchmarks/index.js",
+    "build:benchmarks": "npm run build && tsc -p tsconfig.benchmarks.json",
+    "test:node": "npx vitest run -c ../../config/vitest.config.mts"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/benchmark": "^2.1.5",
+    "benchmark": "^2.1.4"
   }
 }
