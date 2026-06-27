@@ -1,5 +1,5 @@
 import { keccak_256 } from '@noble/hashes/sha3.js'
-import { equalsBytes, qrl as utilQrl } from '@theqrl/util'
+import { bytesToHex, equalsBytes, qrl as utilQrl } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
 import { qrl as stateQrl } from '../../src/index.ts'
@@ -107,6 +107,32 @@ describe('QRLStateManager', () => {
 
     assert.isTrue(stateQrl.isEmptyQRLStorageValue(await state.getStorage(address(5), key)))
     assert.strictEqual((await state.getStorage(address(6), key))[0], 1)
+  })
+
+  it('derives deterministic state and storage roots', async () => {
+    const state = new stateQrl.QRLStateManager()
+    const addr = address(9)
+    const key = new Uint8Array(32)
+    const value = new Uint8Array(64)
+    key[31] = 1
+    value[63] = 2
+
+    const emptyRoot = bytesToHex(await state.getStateRoot())
+    await state.setBalance(addr, 10n)
+    const balanceRoot = bytesToHex(await state.getStateRoot())
+    await state.putStorage(addr, key, value)
+    const storageRoot = bytesToHex(await state.getStateRoot())
+
+    assert.strictEqual(
+      emptyRoot,
+      '0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421',
+    )
+    assert.notStrictEqual(balanceRoot, emptyRoot)
+    assert.notStrictEqual(storageRoot, balanceRoot)
+    assert.strictEqual(storageRoot, bytesToHex(await state.getStateRoot()))
+
+    const copy = state.shallowCopy()
+    assert.strictEqual(bytesToHex(await copy.getStateRoot()), storageRoot)
   })
 
   it('supports checkpoint commit and revert', async () => {

@@ -46,6 +46,8 @@
   },
   "dependencies": {
     "@noble/hashes": "^2.0.1",
+    "@theqrl/mpt": "^10.1.2",
+    "@theqrl/rlp": "^10.1.2",
     "@theqrl/util": "^10.1.2"
   },
   "devDependencies": {}
