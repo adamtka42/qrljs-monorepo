@@ -1,10 +1,12 @@
+import type { qrl as blockQrl } from '@theqrl/block'
 import { qrl as txQrl } from '@theqrl/tx'
-import { hexToBytes, qrl } from '@theqrl/util'
+import { bytesToHex, hexToBytes, qrl } from '@theqrl/util'
 
 import { type QRLRunTxContext } from './context.ts'
 import { QRLLocalChain } from './localChain.ts'
 import {
   formatQRLBlock,
+  formatQRLLog,
   formatQRLReceipt,
   formatQRLTransaction,
   qrlData,
@@ -77,6 +79,8 @@ export class QRLLocalProvider {
         return this.getTransactionByHash(params)
       case 'qrl_getTransactionReceipt':
         return this.getTransactionReceipt(params)
+      case 'qrl_getLogs':
+        return this.getLogs(params)
       case 'qrl_getBlockByNumber':
         return this.getBlockByNumber(params)
       case 'qrl_getBlockByHash':
@@ -277,6 +281,35 @@ export class QRLLocalProvider {
     return receipt === undefined ? null : formatQRLReceipt(receipt)
   }
 
+  private async getLogs(params: unknown[]): Promise<unknown[]> {
+    expectParamCount('qrl_getLogs', params, 1)
+    const filter = parseLogFilter(params[0])
+    const logs: blockQrl.QRLLog[] = []
+
+    if (filter.blockHash !== undefined) {
+      const block = this.chain.getBlockByHash(filter.blockHash)
+      return block === undefined
+        ? []
+        : collectMatchingLogs(block, filter).map((log) => formatQRLLog(log))
+    }
+
+    const latest = this.chain.getBlockNumber()
+    const fromBlock = resolveLogFilterBlock(filter.fromBlock, 0n, latest)
+    const toBlock = resolveLogFilterBlock(filter.toBlock, latest, latest)
+    if (fromBlock > toBlock) {
+      return []
+    }
+
+    for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
+      const block = this.chain.getBlockByNumber(blockNumber)
+      if (block !== undefined) {
+        logs.push(...collectMatchingLogs(block, filter))
+      }
+    }
+
+    return logs.map((log) => formatQRLLog(log))
+  }
+
   private async getBlockByNumber(params: unknown[]): Promise<unknown> {
     expectParamRange('qrl_getBlockByNumber', params, 1, 2)
     const block = this.resolveBlock(params[0])
@@ -344,6 +377,122 @@ export class QRLLocalProvider {
     }
     return this.chain.getBlockByNumber(parseQuantity(value, 'block number'))
   }
+}
+
+interface QRLLogFilter {
+  fromBlock?: unknown
+  toBlock?: unknown
+  blockHash?: Uint8Array
+  addresses?: string[]
+  topics?: Array<Set<string> | null>
+}
+
+function parseLogFilter(value: unknown): QRLLogFilter {
+  if (!isRecord(value)) {
+    throw invalidParams('qrl_getLogs filter must be an object')
+  }
+  if (
+    value.blockHash !== undefined &&
+    (value.fromBlock !== undefined || value.toBlock !== undefined)
+  ) {
+    throw invalidParams('qrl_getLogs blockHash cannot be combined with fromBlock or toBlock')
+  }
+
+  return {
+    fromBlock: value.fromBlock,
+    toBlock: value.toBlock,
+    blockHash: value.blockHash === undefined ? undefined : parseHash(value.blockHash),
+    addresses: parseLogFilterAddresses(value.address),
+    topics: parseLogFilterTopics(value.topics),
+  }
+}
+
+function parseLogFilterAddresses(value: unknown): string[] | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+  if (typeof value === 'string' || value instanceof qrl.QRLAddress) {
+    return [parseAddress(value).toString()]
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => parseAddress(entry).toString())
+  }
+  throw invalidParams('qrl_getLogs address must be a QRL address or an array of QRL addresses')
+}
+
+function parseLogFilterTopics(value: unknown): Array<Set<string> | null> | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+  if (!Array.isArray(value)) {
+    throw invalidParams('qrl_getLogs topics must be an array')
+  }
+  return value.map((entry, index) => {
+    if (entry === null || entry === undefined) {
+      return null
+    }
+    if (typeof entry === 'string' || entry instanceof Uint8Array) {
+      return new Set([bytesToHex(parseLogTopic(entry))])
+    }
+    if (Array.isArray(entry)) {
+      return new Set(
+        entry.map((topic) => {
+          if (topic === null || topic === undefined) {
+            throw invalidParams('qrl_getLogs topic alternatives cannot include null')
+          }
+          return bytesToHex(parseLogTopic(topic))
+        }),
+      )
+    }
+    throw invalidParams(`qrl_getLogs topic at index ${index} must be a topic or topic array`)
+  })
+}
+
+function parseLogTopic(value: unknown): Uint8Array {
+  return parseFixedBytes('QRL log topic', value, 64)
+}
+
+function resolveLogFilterBlock(value: unknown, fallback: bigint, latest: bigint): bigint {
+  if (value === undefined) {
+    return fallback
+  }
+  if (value === 'latest') {
+    return latest
+  }
+  if (value === 'earliest') {
+    return 0n
+  }
+  return parseQuantity(value, 'log filter block')
+}
+
+function collectMatchingLogs(block: blockQrl.QRLBlock, filter: QRLLogFilter): blockQrl.QRLLog[] {
+  const logs: blockQrl.QRLLog[] = []
+  for (const receipt of block.receipts) {
+    for (const log of receipt.logs) {
+      if (matchesLogFilter(log, filter)) {
+        logs.push(log)
+      }
+    }
+  }
+  return logs
+}
+
+function matchesLogFilter(log: blockQrl.QRLLog, filter: QRLLogFilter): boolean {
+  if (filter.addresses !== undefined && !filter.addresses.includes(log.address.toString())) {
+    return false
+  }
+  if (filter.topics === undefined) {
+    return true
+  }
+
+  const logTopics = log.topics.map((topic) => bytesToHex(topic))
+  return filter.topics.every((acceptedTopics, index) => {
+    if (acceptedTopics === null) {
+      return true
+    }
+    const topic = logTopics[index]
+    return topic !== undefined && acceptedTopics.has(topic)
+  })
 }
 
 function parseTransactionRequest(value: unknown): QRLProviderTransactionRequest {

@@ -7,6 +7,14 @@ function address(byte: number): utilQrl.QRLAddress {
   return utilQrl.QRLAddress.fromBytes(new Uint8Array(64).fill(byte))
 }
 
+function logCode(topic: number): Uint8Array {
+  return new Uint8Array([0x60, 0x2a, 0x5f, 0x52, 0x60, topic, 0x60, 0x40, 0x5f, 0xc1, 0x00])
+}
+
+function topicHex(byte: number): string {
+  return `0x${'00'.repeat(63)}${byte.toString(16).padStart(2, '0')}`
+}
+
 describe('QRLLocalProvider', () => {
   it('serves local QRL account, transaction, block, and receipt requests', async () => {
     const sender = address(1)
@@ -223,6 +231,103 @@ describe('QRLLocalProvider', () => {
         ],
       }),
     ).rejects.toMatchObject({ code: -32000 })
+  })
+
+  it('returns logs filtered by block range, block hash, address, and topics', async () => {
+    const sender = address(1)
+    const firstContract = address(3)
+    const secondContract = address(4)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      automine: false,
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    await provider.chain.stateManager.putCode(firstContract, logCode(0x7b))
+    await provider.chain.stateManager.putCode(secondContract, logCode(0x7c))
+
+    await provider.request({
+      method: 'qrl_sendTransaction',
+      params: [
+        {
+          from: sender.toString(),
+          to: firstContract.toString(),
+          gas: '0x186a0',
+          maxFeePerGas: '0x0',
+          maxPriorityFeePerGas: '0x0',
+        },
+      ],
+    })
+    await provider.request({
+      method: 'qrl_sendTransaction',
+      params: [
+        {
+          from: sender.toString(),
+          to: secondContract.toString(),
+          gas: '0x186a0',
+          maxFeePerGas: '0x0',
+          maxPriorityFeePerGas: '0x0',
+        },
+      ],
+    })
+    await provider.request({ method: 'qrl_mine' })
+
+    const allLogs = (await provider.request({
+      method: 'qrl_getLogs',
+      params: [{ fromBlock: 'earliest', toBlock: 'latest' }],
+    })) as Array<{
+      address: string
+      topics: string[]
+      data: string
+      blockNumber: string
+      blockHash: string
+      logIndex: string
+    }>
+
+    assert.strictEqual(allLogs.length, 2)
+    assert.strictEqual(allLogs[0].address, firstContract.toString())
+    assert.strictEqual(allLogs[0].topics[0], topicHex(0x7b))
+    assert.strictEqual(allLogs[0].data, `0x${'00'.repeat(63)}2a`)
+    assert.strictEqual(allLogs[0].blockNumber, '0x1')
+    assert.strictEqual(allLogs[0].logIndex, '0x0')
+    assert.strictEqual(allLogs[1].address, secondContract.toString())
+    assert.strictEqual(allLogs[1].topics[0], topicHex(0x7c))
+    assert.strictEqual(allLogs[1].logIndex, '0x1')
+
+    const block = (await provider.request({
+      method: 'qrl_getBlockByNumber',
+      params: ['0x1'],
+    })) as { hash: string }
+
+    assert.strictEqual(
+      (
+        (await provider.request({
+          method: 'qrl_getLogs',
+          params: [{ blockHash: block.hash, address: firstContract.toString() }],
+        })) as unknown[]
+      ).length,
+      1,
+    )
+    assert.strictEqual(
+      (
+        (await provider.request({
+          method: 'qrl_getLogs',
+          params: [
+            { fromBlock: '0x1', toBlock: '0x1', topics: [[topicHex(0x7b), topicHex(0x7c)]] },
+          ],
+        })) as unknown[]
+      ).length,
+      2,
+    )
+    assert.strictEqual(
+      (
+        (await provider.request({
+          method: 'qrl_getLogs',
+          params: [{ fromBlock: '0x2', toBlock: 'latest' }],
+        })) as unknown[]
+      ).length,
+      0,
+    )
   })
 
   it('reverts only its own qrl_call checkpoint on execution errors', async () => {

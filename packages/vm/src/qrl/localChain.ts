@@ -206,14 +206,18 @@ export class QRLLocalChain {
       receipts,
     })
     const blockHash = draftBlock.hash()
-    const includedReceipts = receipts.map((receipt, index) =>
-      receipt.withInclusion({
+    let logIndexStart = 0
+    const includedReceipts = receipts.map((receipt, index) => {
+      const included = receipt.withInclusion({
         blockHash,
         blockNumber: draftBlock.header.number,
         transactionIndex: index,
         cumulativeGasUsed: receipt.cumulativeGasUsed,
-      }),
-    )
+        logIndexStart,
+      })
+      logIndexStart += receipt.logs.length
+      return included
+    })
     const block = new blockQrl.QRLBlock({
       header: draftBlock.header,
       transactions,
