@@ -1,5 +1,3 @@
-import { keccak_256 } from '@noble/hashes/sha3.js'
-import { RLP } from '@theqrl/rlp'
 import { bytesToHex, hexToBytes } from '@theqrl/util'
 import { assert, describe, it } from 'vitest'
 
@@ -9,7 +7,7 @@ import type { PrefixedHexString } from '@theqrl/util'
 
 const utf8ToBytes = (value: string): Uint8Array => new TextEncoder().encode(value)
 
-describe('QRL trie root helper', () => {
+describe('QRL Merkle Patricia Trie', () => {
   it('returns the canonical empty trie root', () => {
     const trie = new MerklePatriciaTrie()
 
@@ -19,19 +17,25 @@ describe('QRL trie root helper', () => {
     )
   })
 
-  it('derives deterministic roots from sorted key/value entries', async () => {
+  it('matches go-qrl for a single leaf', async () => {
+    const trie = new MerklePatriciaTrie()
+    await trie.put(utf8ToBytes('key'), utf8ToBytes('value'))
+
+    assert.strictEqual(
+      bytesToHex(trie.root()),
+      '0x98021eec76a352d4214ee9d22f2670f3abe01d5805441249f4b70dda75a0e07a',
+    )
+  })
+
+  it('matches go-qrl for sorted branch entries independent of insertion order', async () => {
     const trie = new MerklePatriciaTrie()
     await trie.put(utf8ToBytes('receipt:2'), utf8ToBytes('second'))
     await trie.put(utf8ToBytes('receipt:1'), utf8ToBytes('first'))
 
-    const expected = keccak_256(
-      RLP.encode([
-        [utf8ToBytes('receipt:1'), utf8ToBytes('first')],
-        [utf8ToBytes('receipt:2'), utf8ToBytes('second')],
-      ]),
+    assert.strictEqual(
+      bytesToHex(trie.root()),
+      '0xf2f6042e1b8cb2f98697b45a46b0fd5215d0f1d8a5cf5fa8a623df770e66cec8',
     )
-
-    assert.strictEqual(bytesToHex(trie.root()), bytesToHex(expected))
   })
 
   it('copies inserted values before storing them', async () => {
@@ -45,7 +49,7 @@ describe('QRL trie root helper', () => {
     assert.strictEqual(bytesToHex(trie.root()), beforeMutation)
   })
 
-  it('overwrites existing keys', async () => {
+  it('overwrites existing keys and matches go-qrl', async () => {
     const trie = new MerklePatriciaTrie()
     const key = hexToBytes('0x01' as PrefixedHexString)
 
@@ -56,7 +60,20 @@ describe('QRL trie root helper', () => {
     assert.notStrictEqual(bytesToHex(trie.root()), firstRoot)
     assert.strictEqual(
       bytesToHex(trie.root()),
-      bytesToHex(keccak_256(RLP.encode([[key, utf8ToBytes('second')]]))),
+      '0x4df56fce643f9a5bd379cc079dc23111a5b7edc1e857eb81d62a6922d70d8682',
+    )
+  })
+
+  it('matches go-qrl for mixed branch, extension, and leaf nodes', async () => {
+    const trie = new MerklePatriciaTrie()
+    await trie.put(utf8ToBytes('do'), utf8ToBytes('verb'))
+    await trie.put(utf8ToBytes('dog'), utf8ToBytes('puppy'))
+    await trie.put(utf8ToBytes('doge'), utf8ToBytes('coin'))
+    await trie.put(utf8ToBytes('horse'), utf8ToBytes('stallion'))
+
+    assert.strictEqual(
+      bytesToHex(trie.root()),
+      '0x5991bb8c6514148a29db676a14ac506cd2cd5775ace63c30a4fe457715e9ac84',
     )
   })
 })
