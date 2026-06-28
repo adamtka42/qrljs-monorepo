@@ -1,5 +1,8 @@
-const { readFileSync, existsSync } = require('fs')
-const { join } = require('path')
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const COLORS = {
   RESET: '\x1b[0m',
@@ -71,23 +74,20 @@ function logDependencies(type, map) {
 
 const BASE_PATH = join(__dirname, '..', 'packages')
 const WHITELIST = [
-  '@ethereumjs',
+  '@theqrl',
   '@noble',
   '@scure',
   '@types',
-  'ethereum-cryptography',
-  'ethereum-tests',
   'micro-bmark',
 ]
 
-const directories = require('fs')
-  .readdirSync(BASE_PATH, { withFileTypes: true })
+const directories = readdirSync(BASE_PATH, { withFileTypes: true })
   .filter((file) => file.isDirectory())
   .map((directory) => {
     try {
       return {
         directory: join(BASE_PATH, directory.name),
-        ...require(join(BASE_PATH, directory.name, 'package.json')),
+        ...JSON.parse(readFileSync(join(BASE_PATH, directory.name, 'package.json'), 'utf8')),
       }
     } catch {
       return undefined
@@ -96,7 +96,7 @@ const directories = require('fs')
   .filter(Boolean)
 
 // Always include the root package.json too
-directories.push(require('../package.json'))
+directories.push(JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8')))
 
 let prod = new Map()
 let devs = new Map()

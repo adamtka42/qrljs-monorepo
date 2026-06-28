@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Release script for EthereumJS monorepo packages
+ * Release script for QRL JS monorepo packages
  *
  * Supports both regular releases and in-between releases (nightly, alpha, etc.)
  * Optionally publishes under a different npm scope (e.g. for fork releases).
@@ -34,16 +34,12 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { execSync } from 'child_process'
 
-const DEFAULT_SCOPE = 'ethereumjs'
+const DEFAULT_SCOPE = 'theqrl'
 
 // Active packages from README.md (version + dependencies updated, published)
 const ACTIVE_PACKAGES = [
-  'binarytree',
   'block',
-  'blockchain',
-  'common',
   'evm',
-  'genesis',
   'mpt',
   'rlp',
   'statemanager',
@@ -56,26 +52,17 @@ const ACTIVE_PACKAGES = [
 const PUBLISH_ORDER = [
   'rlp',
   'util',
-  'common',
-  'binarytree',
-  'genesis',
-  'tx',
   'mpt',
+  'tx',
   'block',
   'statemanager',
   'evm',
-  'blockchain',
   'vm',
 ]
 
-// Deprecated packages + testdata (only dependencies updated, not published)
-// These packages keep their own version but need @ethereumjs/* deps updated
+// Deprecated packages kept out of npm publishing but still dependency-rewritten.
 const DEPS_ONLY_PACKAGES = [
-  'client',
-  'devp2p',
-  'ethash',
-  'wallet',
-  'testdata',
+
 ]
 
 interface PackageJson {
@@ -204,7 +191,7 @@ function updatePackages(
 }
 
 /**
- * Rewrites all `@ethereumjs/` references to `@<targetScope>/` across source,
+ * Rewrites all `@theqrl/` references to `@<targetScope>/` across source,
  * compiled output, and type declarations for each active package.
  */
 function rewriteImports(packages: PackageInfo[], targetScope: string): void {
@@ -336,7 +323,7 @@ async function main(): Promise<void> {
   const isFork = scope !== DEFAULT_SCOPE
 
   console.log('\n' + '='.repeat(60))
-  console.log('EthereumJS Release Script')
+  console.log('QRL JS Release Script')
   console.log('='.repeat(60))
   console.log(`Bump version: ${version ?? 'no'}`)
   console.log(`Publish: ${tag ? `yes (tag: ${tag})` : 'no'}`)
@@ -361,7 +348,7 @@ async function main(): Promise<void> {
     })
   }
 
-  // Read package.json files for deps-only packages (deprecated + testdata)
+  // Read package.json files for deps-only packages (deps-only)
   // Skipped entirely for fork releases (not published, rewriting would break local dev)
   const depsOnlyPackages: PackageInfo[] = []
   if (!isFork) {
@@ -383,7 +370,7 @@ async function main(): Promise<void> {
     console.log(`  ${pkg.name}: ${pkg.oldVersion}`)
   }
   if (!isFork) {
-    console.log('\nDeps-only packages (deprecated + testdata):')
+    console.log('\nDeps-only packages (deps-only):')
     for (const pkg of depsOnlyPackages) {
       console.log(`  ${pkg.name}: ${pkg.oldVersion}`)
     }
@@ -409,7 +396,7 @@ async function main(): Promise<void> {
 
     // Step 1: For fork releases, build all packages FIRST under the original
     // scope so TypeScript can resolve monorepo-internal dependencies.
-    // After this, dist/ contains compiled output with @ethereumjs/ imports.
+    // After this, dist/ contains compiled output with @theqrl/ imports.
     if (isFork && tag) {
       buildPackages(packages)
     }

@@ -13,9 +13,6 @@ const config = defineConfig({
       reportsDirectory: './coverage/istanbul'
     },
   },
-  optimizeDeps: {
-    exclude: ['kzg-wasm'],
-  },
 })
 
 export default config

@@ -19,11 +19,4 @@ export default [
       '@typescript-eslint/no-use-before-define': 'off',
     },
   },
-  {
-    files: ['examples/**/*'],
-    rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-    },
-  },
 ]

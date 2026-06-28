@@ -40,19 +40,14 @@ describe('rlp CLI', async () => {
     }
     await cliRunHelper(cliArgs, onData)
   })
-  it('correctly decoded RLP from the CLI'),
-    async () => {
-      const cliArgs = ['decode', '0x05']
-      const onData = (
-        message: string,
-        child: ChildProcessWithoutNullStreams,
-        resolve: Function,
-      ) => {
-        assert.include(message, '0x05', 'cli correctly encoded 5')
-        child.kill(9)
-        resolve(undefined)
-      }
-
-      await cliRunHelper(cliArgs, onData)
+  it('correctly decodes RLP from the CLI', async () => {
+    const cliArgs = ['decode', '0x05']
+    const onData = (message: string, child: ChildProcessWithoutNullStreams, resolve: Function) => {
+      assert.include(message, '"05"', 'cli correctly decoded 0x05')
+      child.kill(9)
+      resolve(undefined)
     }
+
+    await cliRunHelper(cliArgs, onData)
+  })
 })

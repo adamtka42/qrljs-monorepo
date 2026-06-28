@@ -1,27 +1,27 @@
 /**
- * Generic EthereumJS error class with metadata attached
+ * Generic QRL JS error class with metadata attached
  *
  * Kudos to https://github.com/ChainSafe/lodestar monorepo
  * for the inspiration :-)
  * See: https://github.com/ChainSafe/lodestar/blob/unstable/packages/utils/src/errors.ts
  */
-export type EthereumJSErrorMetaData = Record<string, string | number | null>
-export type EthereumJSErrorObject = {
+export type QRLJSErrorMetaData = Record<string, string | number | null>
+export type QRLJSErrorObject = {
   message: string
   stack: string
   className: string
-  type: EthereumJSErrorMetaData
+  type: QRLJSErrorMetaData
 }
 
-// In order to update all our errors to use `EthereumJSError`, temporarily include the
+// In order to update all our errors to use `QRLJSError`, temporarily include the
 // unset error code. All errors throwing this code should be updated to use the relevant
 // error code.
-export const DEFAULT_ERROR_CODE = 'ETHEREUMJS_DEFAULT_ERROR_CODE'
+export const DEFAULT_ERROR_CODE = 'QRLJS_DEFAULT_ERROR_CODE'
 
 /**
- * Generic EthereumJS error with attached metadata
+ * Generic QRL JS error with attached metadata
  */
-export class EthereumJSError<T extends { code: string }> extends Error {
+export class QRLJSError<T extends { code: string }> extends Error {
   type: T
   constructor(type: T, message?: string, stack?: string) {
     super(message ?? type.code)
@@ -29,14 +29,14 @@ export class EthereumJSError<T extends { code: string }> extends Error {
     if (stack !== undefined) this.stack = stack
   }
 
-  getMetadata(): EthereumJSErrorMetaData {
+  getMetadata(): QRLJSErrorMetaData {
     return this.type
   }
 
   /**
    * Get the metadata and the stacktrace for the error.
    */
-  toObject(): EthereumJSErrorObject {
+  toObject(): QRLJSErrorObject {
     return {
       type: this.getMetadata(),
       message: this.message ?? '',
@@ -47,11 +47,11 @@ export class EthereumJSError<T extends { code: string }> extends Error {
 }
 
 /**
- * @deprecated Use `EthereumJSError` with a set error code instead
+ * @deprecated Use `QRLJSError` with a set error code instead
  * @param message Optional error message
  * @param stack Optional stack trace
  * @returns
  */
-export function EthereumJSErrorWithoutCode(message?: string, stack?: string) {
-  return new EthereumJSError({ code: DEFAULT_ERROR_CODE }, message, stack)
+export function QRLJSErrorWithoutCode(message?: string, stack?: string) {
+  return new QRLJSError({ code: DEFAULT_ERROR_CODE }, message, stack)
 }

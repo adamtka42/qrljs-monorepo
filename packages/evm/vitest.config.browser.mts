@@ -7,9 +7,8 @@ export default mergeConfig(
     test: {
       exclude: [
         ...configDefaults.exclude,
-        // readDirSync method not provided fs mock for vite
-        'test/precompiles/eip-2537-bls.spec.ts',
-        'test/eips/eof-header-validation.spec.ts',
+        // The QRL EVM tests use Node.js builtins and run in the node environment.
+        'test/qrl/**/*.spec.ts',
       ],
     },
   }),

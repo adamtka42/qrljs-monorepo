@@ -6,10 +6,13 @@
     "lib": ["dom"],
     "composite": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/index.ts", "src/qrl/**/*.ts"],
   "references": [
-    { "path": "../common/tsconfig.prod.esm.json" },
-    { "path": "../rlp/tsconfig.prod.esm.json" },
-    { "path": "../util/tsconfig.prod.esm.json" }
+    {
+      "path": "../rlp/tsconfig.prod.esm.json"
+    },
+    {
+      "path": "../util/tsconfig.prod.esm.json"
+    }
   ]
 }

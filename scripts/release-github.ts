@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 /**
- * GitHub Release script for EthereumJS monorepo packages
+ * GitHub release script for QRL JS monorepo packages
  *
  * Creates GitHub releases for all active packages after npm releases are done.
- * Extracts release notes from CHANGELOG.md files.
+ * Creates package release notes from package metadata or optional changelog files.
  *
  * Usage:
  *   tsx scripts/release-github.ts --version=<version> [--start-with=<package>]
@@ -20,19 +20,15 @@
  *   Set GITHUB_TOKEN environment variable or be authenticated via `gh` CLI.
  */
 
-import { readFileSync, writeFileSync, unlinkSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { execSync } from 'child_process'
 import * as readline from 'readline'
 
 // Active packages from README.md (same as release.ts)
 const ACTIVE_PACKAGES = [
-  'binarytree',
   'block',
-  'blockchain',
-  'common',
   'evm',
-  'genesis',
   'mpt',
   'rlp',
   'statemanager',
@@ -41,9 +37,9 @@ const ACTIVE_PACKAGES = [
   'vm',
 ]
 
-const REPO_OWNER = 'ethereumjs'
-const REPO_NAME = 'ethereumjs-monorepo'
-const TARGET_BRANCH = 'master'
+const REPO_OWNER = 'adamtka42'
+const REPO_NAME = 'qrljs-monorepo'
+const TARGET_BRANCH = 'qrl-adaptation'
 
 interface ParsedArgs {
   version: string
@@ -103,28 +99,35 @@ async function confirm(message: string): Promise<boolean> {
 }
 
 /**
- * Extract release notes for a specific version from CHANGELOG.md
+ * Build release notes for a specific package version.
  */
-function extractReleaseNotes(changelogPath: string, version: string): string {
-  const content = readFileSync(changelogPath, 'utf-8')
+function extractReleaseNotes(releaseNotesPath: string, version: string): string {
+  if (!existsSync(releaseNotesPath)) {
+    const packageJsonPath = join(releaseNotesPath, '..', 'package.json')
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as { name?: string }
+    return [
+      'Release notes for ' + (packageJson.name ?? 'package') + ' v' + version + '.',
+      '',
+      'This QRL-focused package does not keep per-package changelog files in the repository.',
+    ].join('\n')
+  }
+
+  const content = readFileSync(releaseNotesPath, 'utf-8')
   const lines = content.split('\n')
 
   let capturing = false
-  let releaseNotes: string[] = []
+  const releaseNotes: string[] = []
 
   for (const line of lines) {
-    // Check for version header (e.g., "## 10.1.1 - 2025-01-28")
     if (line.startsWith('## ')) {
       if (capturing) {
-        // We've reached the next version section, stop capturing
         break
       }
 
-      // Check if this is the version we're looking for
       const versionMatch = line.match(/^## (\d+\.\d+\.\d+(?:-[^\s]+)?)/)
       if (versionMatch && versionMatch[1] === version) {
         capturing = true
-        continue // Skip the header line itself
+        continue
       }
     }
 
@@ -133,19 +136,8 @@ function extractReleaseNotes(changelogPath: string, version: string): string {
     }
   }
 
-  // Trim leading/trailing empty lines
-  while (releaseNotes.length > 0 && releaseNotes[0].trim() === '') {
-    releaseNotes.shift()
-  }
-  while (releaseNotes.length > 0 && releaseNotes[releaseNotes.length - 1].trim() === '') {
-    releaseNotes.pop()
-  }
-
-  if (releaseNotes.length === 0) {
-    return `Release ${version}`
-  }
-
-  return releaseNotes.join('\n')
+  const notes = releaseNotes.join('\n').trim()
+  return notes.length === 0 ? 'Release notes for v' + version + '.' : notes
 }
 
 /**
@@ -156,7 +148,7 @@ async function createGitHubRelease(
   version: string,
   releaseNotes: string
 ): Promise<boolean> {
-  const fullPackageName = `@ethereumjs/${packageName}`
+  const fullPackageName = `@theqrl/${packageName}`
   const tag = `${fullPackageName}@${version}`
   const title = `${fullPackageName} v${version}`
 
@@ -211,7 +203,7 @@ async function main(): Promise<void> {
   const { version, startWith } = parseArgs()
 
   console.log('\n' + '='.repeat(60))
-  console.log('EthereumJS GitHub Release Script')
+  console.log('QRL JS GitHub Release Script')
   console.log('='.repeat(60))
   console.log(`Version: ${version}`)
   console.log(`Target branch: ${TARGET_BRANCH}`)
@@ -249,15 +241,15 @@ async function main(): Promise<void> {
 
   for (const packageName of packagesToProcess) {
     const packagePath = join(packagesPath, packageName)
-    const changelogPath = join(packagePath, 'CHANGELOG.md')
+    const releaseNotesPath = join(packagePath, 'RELEASE_NOTES.md')
 
     console.log(`\n${'─'.repeat(50)}`)
     console.log(`📦 Package: ${packageName} (${packagesToProcess.indexOf(packageName) + 1}/${packagesToProcess.length})`)
     console.log('─'.repeat(50))
 
     try {
-      // Extract release notes from CHANGELOG
-      const releaseNotes = extractReleaseNotes(changelogPath, version)
+      // Build release notes from package metadata or an optional release-note file.
+      const releaseNotes = extractReleaseNotes(releaseNotesPath, version)
 
       // Create GitHub release (with confirmation)
       const created = await createGitHubRelease(packageName, version, releaseNotes)

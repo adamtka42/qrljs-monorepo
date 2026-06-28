@@ -13,7 +13,6 @@ export default [
       '**/.eslintrc.cjs',
       '**/.eslintrc.js',
       '**/eslint.config.mjs',
-      '**/benchmarks',
       '**/coverage',
       '**/dist/*',
       '**/node_modules',
@@ -23,7 +22,6 @@ export default [
       '**/typedoc.*',
       '**/vitest.config.*',
       '**/vite.*.ts',
-      '**/ethereum-tests/**',
       '**/devnets/**',
       '**/eslint/**',
       '**/lint-staged.config.js',
@@ -54,7 +52,7 @@ export default [
         {
           selector: "ThrowStatement > NewExpression[callee.name='Error']",
           message:
-            'Throwing default JS Errors is not allowed. Only throw `EthereumJSError` (see the util package)',
+            'Throwing default JS Errors is not allowed. Only throw `QRLJSError` (see the util package)',
         },
       ],
       'no-restricted-globals': [
@@ -131,7 +129,6 @@ export default [
   },
   {
     files: ['**/*.ts'],
-    ignores: ['**/examples/*.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -156,31 +153,10 @@ export default [
     },
   },
   {
-    files: ['packages/client/test/sim/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-      'no-console': 'off',
-      'no-undef': 'off',
-    },
-  },
-  {
     files: ['**/*.js', '**/*.cjs', '**/*.cts'],
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
       'no-undef': 'off',
-    },
-  },
-  {
-    files: [
-      '**/examples/**/*.ts',
-      '**/examples/**/*.js',
-      '**/examples/**/*.cjs',
-      '**/benchmarks/*.ts',
-    ],
-    rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-restricted-syntax': 'off',
     },
   },
   {
@@ -190,14 +166,7 @@ export default [
     },
   },
   {
-    files: ['packages/devp2p/**'],
-    rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-    },
-  },
-  {
-    files: ['packages/devp2p/src/ext/**', 'packages/client/src/ext/**', '**/test/**/*.ts'],
+    files: ['**/test/**/*.ts'],
     rules: {
       'no-restricted-syntax': 'off',
       'no-restricted-properties': [
@@ -213,22 +182,6 @@ export default [
           message: 'Usage of assert.notOk is forbidden because it relies on falseness.',
         },
       ],
-    },
-  },
-  {
-    files: ['packages/wallet/**'],
-    rules: {
-      'no-prototype-builtins': 'warn',
-    },
-  },
-  {
-    files: [
-      'packages/vm/test/util.ts',
-      'packages/vm/test/tester/**/*.ts',
-      'packages/vm/examples/**/*.ts',
-    ],
-    rules: {
-      'no-console': 'off',
     },
   },
 ]

@@ -12,8 +12,8 @@ export default defineConfig({
     },
     lib: {
       entry: './src/',
-      name: '@ethereumjs/evm',
-      fileName: (format) => `ethereumjs-evm-bundle.${format}.js`,
+      name: 'QRLJSEVM',
+      fileName: (format) => `qrljs-evm-bundle.${format}.js`,
       // only build for es
       formats: ['es'],
     },

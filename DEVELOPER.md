@@ -1,216 +1,66 @@
-# EthereumJS - Developer Docs
+# QRL JS Developer Docs
 
-This guide provides an overview of the monorepo, development tools used, shared configuration and additionally covers some advanced topics.
-
-It is intended to be both an entrypoint for external contributors as well as a reference point for team members.
-
-## Contents
-
-- [Monorepo](#monorepo)
-  - [Structure](#structure)
-  - [Workflow](#workflow)
-  - [Releases](#releases)
-    - [Fork Releases (Feel Your Protocol)](#fork-releases-feel-your-protocol)
-- [Development Tools](#development-tools)
-  - [TypeScript](#typescript)
-  - [Linting](#linting)
-  - [Spellcheck](#spellcheck)
-  - [Testing](#testing)
-  - [Documentation](#documentation)
-- [Advanced Topics](#advanced-topics)
-  - [Linking to an External Library](#linking-to-an-external-library)
-  - [Shared Dependencies](#shared-dependencies)
-- [Additional Docs](#additional-docs)
-  - [VM](#vm)
-  - [Client](#client)
+This guide covers the active QRL-focused monorepo layout, common development commands,
+and release helper behavior.
 
 ## Monorepo
 
+The project uses npm workspaces to manage the active packages under `packages/`.
+Package names use the QRL `@theqrl/*` scope.
+
 ### Structure
 
-The EthereumJS project uses [npm workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces) to manage all the packages in our monorepo and link packages together.
+- `/packages` - Active QRL execution packages and generic helpers.
+- `/config` - Shared TypeScript, lint, spellcheck, and test configuration.
+- `/scripts` - Release and repository maintenance helpers.
 
-#### Key Directories
+### Common Commands
 
-- `/packages` - Contains all EthereumJS packages
-- `/config` - Shared configuration files and scripts
-- `packages/ethereum-tests` - Git submodule with Ethereum test vectors (legacy)
-- `packages/execution-spec-tests` - Git submodule with selected execution-spec-tests fixtures
+- Clean the workspace: `npm run clean`
+- Lint code: `npm run lint`
+- Fix linting issues: `npm run lint:fix`
+- Build all packages: `npm run build --workspaces --if-present`
+- Type-check all packages: `npm run tsc --workspaces --if-present`
+- Test all packages: `npm test --workspaces --if-present`
+- Spellcheck docs and code: `npm run spellcheck`
 
-### Scripts
+### Working on a Specific Package
 
-The `./config/cli` directory contains helper scripts referenced in package.json files:
+Example for the VM package:
 
-- `coverage.sh` - Runs test coverage
-- `ts-build.sh` - Builds TypeScript for production
-- `ts-compile.sh` - Compiles TypeScript for development
+```sh
+cd packages/vm
+npm run test
+npx vitest test/qrl/localVm.spec.ts
+npm run build --workspace=@theqrl/vm
+```
 
-### Workflow
+## Releases
 
-#### Common Commands
-
-- **Clean the workspace**: `npm run clean` - Removes build artifacts and node_modules
-- **Lint code**: `npm run lint` - Check code style with ESLint v9 and Biome
-- **Fix linting issues**: `npm run lint:fix` - Automatically fix style issues
-- **Build all packages**: `npm run build --workspaces` - Build all packages in the monorepo
-- **Build documentation**: `npm run docs:build` - Generate documentation for all packages
-
-#### Working on a Specific Package
-
-To focus on a single package (e.g., VM):
-
-1. Navigate to the package directory: `cd packages/vm`
-2. Run tests: `npm run test`
-3. Run a specific test: `npx vitest test/path/to/test.spec.ts`
-4. Build just that package: `npm run build --workspace=@ethereumjs/vm`
-
-### Releases
-
-#### Overview
-
-Releases are done in sync for all [active packages](./README.md#active-packages) and all libraries are always bumped to a same new version number. Library combinations with matching versions are CI tested and ensured to be compatible with each other.
-
-Most release rounds are done as bugfix releases, including releases of non-finalized EIP versions. Minor releases are done for hardfork finalization and otherwise outstanding selected features. Major release rounds are rarely done and are reserved to bundle structural breaking changes which come along significant changes to the API.
-
-#### Process
-
-##### Version/Dependency Update & Publish Script
-
-We have a release script that handles version bumping and publishing for all packages. It supports both regular releases and lightweight in-between releases (nightly, alpha).
+Release tooling is retained for the active package set only:
 
 ```sh
 tsx scripts/release-npm.ts [--bump-version=<version>] [--publish=<tag>] [--scope=<scope>] [--otp=<code>]
+tsx scripts/release-github.ts --version=<version> [--start-with=<package>]
 ```
 
-**Options:**
+The npm release script defaults to the `@theqrl/*` package scope. Use `--scope=<scope>` only for an explicit fork-style publish.
 
-- `--bump-version=<version>` - Bump package versions to the specified version (skips publish unless `--publish` is also set)
-- `--publish=<tag>` - Publish packages with the specified npm tag (default: `latest`)
-- `--scope=<scope>` - Publish under a different npm scope (default: `ethereumjs`, see [Fork Releases](#fork-releases-feel-your-protocol))
-- `--otp=<code>` - One-time password when npm 2FA is enabled
-
-With **no flags**, the script publishes the current package versions to npm under the `latest` tag (typical flow after a manual version bump and CHANGELOG prep).
-
-**npm authentication** (required for publish):
-
-- **Interactive (maintainer laptop):** `npm login` — stores a token in `~/.npmrc`. Use a [granular access token](https://docs.npmjs.com/creating-and-viewing-access-tokens) with publish access to the `@ethereumjs` scope (recommended over classic tokens).
-- **Token in config:** add a registry `_authToken` entry to `~/.npmrc` (see [npm registry auth](https://docs.npmjs.com/cli/v10/using-npm/registry); never commit tokens). Same granular publish token as above.
-- **2FA:** pass `--otp=<code>` when your npm account requires it.
-
-The script runs `npm whoami` before publishing and exits if you are not authenticated.
-
-**What the script does:**
-
-- **Active packages**: Updates version numbers and `@ethereumjs/*` dependency references (with `--bump-version`), then publishes in dependency order (`rlp` → … → `vm`)
-- **Deprecated packages + testdata**: Only updates (active) `@ethereumjs/*` dependency references when bumping (keeps their own version unchanged, not published)
-- **`prepublishOnly` per package**: clean, build, and test run automatically via `npm publish` (can take a while for the full round)
-
-**Examples:**
-
-```sh
-# Publish current versions (after bump + CHANGELOG prep) — most common
-tsx scripts/release-npm.ts
-
-# Same, explicit tag
-tsx scripts/release-npm.ts --publish=latest
-
-# Bump versions only (no publish) - for preparing a release
-tsx scripts/release-npm.ts --bump-version=10.1.0
-
-# Bump versions and publish - full release in one step
-tsx scripts/release-npm.ts --bump-version=10.1.0 --publish=latest
-
-# Lightweight nightly release
-tsx scripts/release-npm.ts --bump-version=10.1.1-nightly.1 --publish=nightly
-
-# Publish with 2FA one-time password
-tsx scripts/release-npm.ts --otp=123456
-```
-
-##### Fork Releases (Feel Your Protocol)
-
-The release script supports publishing all packages under a different npm scope via the `--scope` flag. This is used by [Feel Your Protocol](https://feelyourprotocol.org) to publish fork releases from feature branches (e.g. EIP prototype implementations) that can be integrated as separate dependencies alongside the official `@ethereumjs/*` packages.
-
-```sh
-# Publish all packages under @feelyourprotocol scope
-tsx scripts/release-npm.ts --scope=feelyourprotocol --bump-version=8141.0.0 --publish=latest
-```
-
-When `--scope` is set to a value other than `ethereumjs`, the script:
-
-- Rewrites package names: `@ethereumjs/evm` → `@<scope>/evm`
-- Rewrites inter-package dependency references to match the new scope
-- Rewrites `@ethereumjs/` import paths in all source files under `src/`
-- Skips deps-only packages (not published, rewriting would break local dev)
-- Publishes with `--access=public` (required for new scoped npm orgs)
-
-The `--scope` flag is fully generic and not tied to any specific npm org.
-
-##### CHANGELOG Preparation
-
-The following prompt has been tested with Cursor IDE to work well for CHANGELOG updates (please update placeholders in the first paragraph accordingly):
-
-```markdown
-I want to do a new release round for all active packages listed in @README.md. Version bump has already been done, see an exemplary [ REFERENCE package.json FILE ] file, release is target for today. Last release round has been done on [ ENTER DATE IN FORMAT: April 29 2025 ] along commit [ ENTER COMMIT HASH, e.g.: 9e461f54312bf20c710b43ab73f7d3ad753f8765 ]. An exemplary CHANGELOG.md file is [ REFERENCE e.g. block CHANGELOG.md file ].
-
-Can you please add new sections in the CHANGELOG files and add one-line summaries for the user-facing changes? For this please go for the commits since last release, one commit represents one PR due to our (squash) merge policy. You can leave out PRs only updating documentation, code in the examples folder or tests. Also tooling infrastructure (linting,...) and CI updating PRs can be left out. New support for new and deprecation for older Node.js as well as TypeScript versions should be added. Version updates for external dependencies - so not from within the monorepo - should be added as well.
-
-Here is an example for the format of a change/PR entry:
-
-- New default hardfork: `Shanghai` -> `Cancun`, see PR [#3566](https://github.com/ethereumjs/ethereumjs-monorepo/pull/3566)
-
-For the CHANGELOG files you have not added lines in this step please nevertheless add a CHANGELOG entry (we do releases for all active packages no matter the changeset) and enter the following sentence: Maintenance release, no active changes.
-```
-
-#### Windows Users Note
-
-Windows users might encounter errors with script paths. To fix, configure Git bash as the script shell:
-
-```sh
-npm config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"
-```
-
-To reset this setting:
-
-```sh
-npm config delete script-shell
-```
+Package changelogs are not maintained in this QRL-focused repository. GitHub release
+notes are generated from package metadata by default. For richer notes, add an
+optional `RELEASE_NOTES.md` to the package or summarize the release from the commit
+range.
 
 ## Development Tools
 
 ### TypeScript
 
-All packages use [TypeScript](https://www.typescriptlang.org/) with a shared base configuration.
-
-#### Configuration Files
-
 Each package should have:
 
-- `tsconfig.json` - For development and testing
-- `tsconfig.prod.json` - For building production releases
+- `tsconfig.json` for development and tests.
+- `tsconfig.prod.json` for production builds.
 
-Example `tsconfig.json`:
-```json
-{
-  "extends": "../../config/tsconfig.json",
-  "include": ["src/**/*.ts", "test/**/*.ts"]
-}
-```
-
-Example `tsconfig.prod.json`:
-```json
-{
-  "extends": "../../config/tsconfig.prod.json",
-  "include": ["src/**/*.ts"],
-  "compilerOptions": {
-    "outDir": "./dist"
-  }
-}
-```
-
-#### Build Commands
-
-Use these commands in your package scripts:
+Build scripts use the shared helpers in `config/cli`:
 
 ```json
 {
@@ -223,127 +73,55 @@ Use these commands in your package scripts:
 
 ### Linting
 
-We use [ESLint](https://eslint.org/) v9 and [Biome](https://biomejs.dev/) for code style enforcement and linting.
+The project uses ESLint v9 and Biome. Package-level ESLint configs extend the
+repository-wide config.
 
-#### Configuration Files
-
-Each package includes:
-
-- `eslint.config.mjs` - package specific ESLint configuration that extends the repository wide config
-
-
-#### Commands
-
-Commands area available on both root and package levels.
-
-Run `npm run lint` to find lint issues and `npm run lint:fix` to fix fixable lint issues.
-
+```sh
+npm run lint
+npm run lint:fix
+```
 
 ### Spellcheck
 
-We use [cspell](https://github.com/streetsidesoftware/cspell) to do spellchecking. 
+Spellcheck configuration lives in:
 
-#### Configuration Files
+- `config/cspell-md.json`
+- `config/cspell-ts.json`
 
-The following two configuration files include a list of allowed words (add yours if you have one necessary) as well as some additional configuration, separate for docs and code.
+Run:
 
-- `config/cspell-md.json` | `Markdown`
-- `config/cspell-ts.json` | `TypeScript`
-
-#### Commands
-
-Commands area available on both root and package levels.
-
-```json
-{
-  "scripts": {
-    "sc": "npm run spellcheck",
-    "spellcheck": "npm run spellcheck:ts && npm run spellcheck:md",
-    "spellcheck:ts": "npx cspell --gitignore -c ../../config/cspell-ts.json ...",
-    "spellcheck:md": "npx cspell --gitignore -c ../../config/cspell-md.json ..."
-  }
-}
+```sh
+npm run spellcheck
 ```
 
 ### Testing
 
-The project uses [Vitest](https://vitest.dev/) for testing with [c8](https://vitest.dev/guide/coverage.html) for code coverage.
-
-#### General
-
-Each package includes one or more test scripts.  To run all tests in any package, use `npm run test`.  Refer to the package.json for more specifics.
-
-To run a specific test and watch for changes:
+The project uses Vitest. QRL tests live under package `test/qrl` directories.
 
 ```sh
-npx vitest test/path/to/test.spec.ts
+npm test --workspaces --if-present
+npx vitest packages/vm/test/qrl/localVm.spec.ts
 ```
 
-#### Browser
+## Linking to an External Project
 
-We use `vitest` with [playwright](https://playwright.dev/) to run browser tests in real Chromium (headless).
-
-**Local:** browser tests are optional unless you are working on bundling or browser-specific behaviour. Install Chromium once (Chromium only — not the full Playwright browser set):
+To test a package locally from another project:
 
 ```sh
-npm run install-browser-deps
-# equivalent to: npx playwright install chromium
-```
-
-Then run `npm run test:browser` in a package, or `npm run test:browser` from the monorepo root.
-
-**CI:** deps are restored on the host runner (same cache as other jobs). Browser tests run in the official [Playwright Docker image](https://playwright.dev/docs/docker) (`mcr.microsoft.com/playwright:v1.60.0-noble`) via `docker run` — preinstalled browsers, no Chromium download per run. Keep the image tag in `.github/workflows/browser.yml` in sync with the `playwright` version in `package-lock.json`.
-
-## Advanced Topics
-
-### Linking to an External Library
-
-#### Quick Summary
-
-To test packages with an external project locally, use npm link:
-
-1. Build the package you want to test:
-```sh
-cd packages/package-name
+cd packages/vm
 npm run build
-```
-
-2. Link the package globally:
-```sh
 npm link
+
+cd path/to/consumer
+npm link @theqrl/vm
 ```
 
-3. In your test project, link to the local package:
+When done:
+
 ```sh
-cd path/to/your/project
-npm link @ethereumjs/package-name
-```
+cd path/to/consumer
+npm unlink --no-save @theqrl/vm
 
-4. When you make changes to your package, rebuild it for the changes to be reflected.
-
-5. When done testing, unlink:
-```sh
-# In your test project
-npm unlink --no-save @ethereumjs/package-name
-
-# In the package directory
+cd /path/to/qrljs-monorepo/packages/vm
 npm unlink
 ```
-
-When making changes to the linked package, rebuild it for the changes to be reflected in your test project.
-
-### Shared Dependencies
-
-Common development dependencies (e.g. `eslint`, `biome`) are defined in the root `package.json`. 
-
-## Additional Docs
-
-There are selected additional developer docs available to get more deep on certain topics. The following is an overview.
-
-### VM
-
-[VM Docs](./packages/vm/DEVELOPER.md) for testing, debugging and VM/EVM profiling.
-
-### Client
-
-[Client Docs](./packages/client/DEVELOPER.md) for running Hive tests.

@@ -12,13 +12,9 @@
       "**/node_modules/**",
       "**/dist/**",
       "**/coverage/**",
-      "**/ethereum-tests/**",
-      "**/execution-spec-tests/**",
       "**/config/**",
-      "**/4844-interop/**",
       "**/scripts/**",
-      "**/rlp/bin/**",
-      "**/benchmarks/fixture/**"
+      "**/rlp/bin/**"
     ]
   },
   "formatter": {

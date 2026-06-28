@@ -4,9 +4,13 @@
     "rootDir": "src",
     "outDir": "dist/cjs"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/index.ts"],
   "references": [
-    { "path": "../rlp/tsconfig.prod.cjs.json" },
-    { "path": "../util/tsconfig.prod.cjs.json" }
+    {
+      "path": "../rlp/tsconfig.prod.cjs.json"
+    },
+    {
+      "path": "../util/tsconfig.prod.cjs.json"
+    }
   ]
 }

@@ -1,30 +1,39 @@
 name: VM
 on:
-  push:
-    branches: [master]
-    tags: ['*']
+  workflow_call:
+    inputs:
+      dep-cache-key:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      dep-cache-key:
+        required: false
+        default: 'none'
+
+env:
+  cwd: ${{github.workspace}}/packages/vm
 
 defaults:
   run:
     working-directory: packages/vm
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-vm
   cancel-in-progress: true
 
 jobs:
-  test-vm-state:
+  test-vm:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-        with:
-          submodules: recursive
 
-      - uses: actions/cache/restore@v4
+      - if: inputs.dep-cache-key != 'none'
+        uses: actions/cache/restore@v4
         id: dep-cache
         with:
           path: ${{github.workspace}}
-          key: npm-${{ hashFiles('package-lock.json') }}
+          key: ${{ inputs.dep-cache-key }}
 
       - name: Use Node.js 24
         uses: actions/setup-node@v6
@@ -37,30 +46,9 @@ jobs:
         run: npm ci
         working-directory: ${{ github.workspace }}
 
-      - run: npm run test:state:newForks
-
-  test-vm-blockchain:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+      - run: npm run coverage
+      - uses: codecov/codecov-action@v4
         with:
-          submodules: recursive
-
-      - uses: actions/cache/restore@v4
-        id: dep-cache
-        with:
-          path: ${{github.workspace}}
-          key: npm-${{ hashFiles('package-lock.json') }}
-
-      - name: Use Node.js 24
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: 'npm'
-
-      - name: Install Dependencies (if not restored from cache)
-        if: steps.dep-cache.outputs.cache-hit != 'true'
-        run: npm ci
-        working-directory: ${{ github.workspace }}
-
-      - run: npm run test:blockchain
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ env.cwd }}/coverage/lcov.info
+          flags: vm
