@@ -19,6 +19,8 @@
     "bytestring",
     "divmod",
     "merkelize",
+    "merkleize",
+    "depositroot",
     "kaust",
     "EEST",
     "paulmillr",
