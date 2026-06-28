@@ -59,6 +59,10 @@ describe('QRL provider formatting', () => {
 
     const formattedBlockWithTxs = qrl.formatQRLBlock(block, true)
     assert.strictEqual(typeof formattedBlockWithTxs.transactions[0], 'object')
+    assert.strictEqual(
+      (formattedBlockWithTxs.transactions[0] as qrl.QRLFormattedTransaction).from,
+      address(1).toString(),
+    )
 
     assert.strictEqual(qrl.formatQRLReceipt(receipt).status, '0x1')
     assert.strictEqual(qrl.formatQRLLog(log).topics[0], `0x${'04'.repeat(64)}`)

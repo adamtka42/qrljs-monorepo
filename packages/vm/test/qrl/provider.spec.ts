@@ -95,6 +95,103 @@ describe('QRLLocalProvider', () => {
     assert.strictEqual(blockByHash.number, '0x1')
   })
 
+  it('separates latest and pending state for queued local transactions', async () => {
+    const sender = address(1)
+    const receiver = address(2)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      automine: false,
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'pending'],
+      }),
+      '0x0',
+    )
+
+    await provider.request({
+      method: 'qrl_sendTransaction',
+      params: [
+        {
+          from: sender.toString(),
+          to: receiver.toString(),
+          gas: '0x5208',
+          maxFeePerGas: '0x0',
+          maxPriorityFeePerGas: '0x0',
+          value: '0x2a',
+        },
+      ],
+    })
+
+    assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'latest'],
+      }),
+      '0x0',
+    )
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'pending'],
+      }),
+      '0x1',
+    )
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getBalance', params: [receiver.toString(), 'latest'] }),
+      '0x0',
+    )
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getBalance',
+        params: [receiver.toString(), 'pending'],
+      }),
+      '0x2a',
+    )
+
+    const pendingBlock = (await provider.request({
+      method: 'qrl_getBlockByNumber',
+      params: ['pending', false],
+    })) as { number: string; transactions: string[]; receipts: Array<{ status: string }> }
+
+    assert.strictEqual(pendingBlock.number, '0x1')
+    assert.strictEqual(pendingBlock.transactions.length, 1)
+    assert.strictEqual(pendingBlock.receipts[0].status, '0x1')
+    assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
+
+    const pendingBlockWithTxs = (await provider.request({
+      method: 'qrl_getBlockByNumber',
+      params: ['pending', true],
+    })) as { transactions: Array<{ from: string; to: string }> }
+    assert.strictEqual(pendingBlockWithTxs.transactions[0].from, sender.toString())
+    assert.strictEqual(pendingBlockWithTxs.transactions[0].to, receiver.toString())
+
+    await provider.request({ method: 'qrl_mine' })
+
+    const latestBlock = (await provider.request({
+      method: 'qrl_getBlockByNumber',
+      params: ['latest', false],
+    })) as { number: string; transactions: string[] }
+
+    assert.strictEqual(latestBlock.number, pendingBlock.number)
+    assert.deepEqual(latestBlock.transactions, pendingBlock.transactions)
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'latest'],
+      }),
+      '0x1',
+    )
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getBalance', params: [receiver.toString(), 'latest'] }),
+      '0x2a',
+    )
+  })
+
   it('supports code, storage, qrl_call, mining, snapshots, and revert', async () => {
     const sender = address(1)
     const contract = address(3)

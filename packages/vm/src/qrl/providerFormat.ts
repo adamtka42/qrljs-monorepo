@@ -72,7 +72,9 @@ export function formatQRLBlock(
     receiptsRoot: qrlHash(block.header.receiptsRoot),
     logsBloom: qrlData(block.header.logsBloom),
     transactions: includeTransactions
-      ? block.transactions.map((tx, index) => formatQRLTransaction(tx, block, index))
+      ? block.transactions.map((tx, index) =>
+          formatQRLTransaction(tx, block, index, block.receipts[index]?.from),
+        )
       : block.transactions.map((tx) => qrlHash(tx.hash())),
     receipts: block.receipts.map((receipt) => formatQRLReceipt(receipt)),
   }
