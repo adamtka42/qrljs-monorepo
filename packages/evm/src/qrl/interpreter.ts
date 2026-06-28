@@ -16,6 +16,7 @@ import {
 } from './gas.ts'
 import { QRLMemory } from './memory.ts'
 import { type QRLExecutionContext, QRLMessage } from './message.ts'
+import { isQRLPrecompile, runQRLPrecompile } from './precompiles.ts'
 import { type QRLExecutionLog, type QRLExecutionResult } from './result.ts'
 import { QRLStack } from './stack.ts'
 import { QRLUint512 } from './uint512.ts'
@@ -846,7 +847,6 @@ export class QRLInterpreter {
     const isDelegateCall = options.kind === 'delegatecall'
     const address = isDelegateCall ? options.message.to : options.target
     const caller = isDelegateCall ? options.message.caller : options.message.to
-    const code = await this.stateManager.getCode(options.target)
     const context: QRLExecutionContext = {
       ...this.context,
       caller,
@@ -861,6 +861,24 @@ export class QRLInterpreter {
         await this.stateManager.addBalance(options.target, options.value)
       }
 
+      if (isQRLPrecompile(options.target)) {
+        const result = runQRLPrecompile(
+          options.target,
+          options.input,
+          options.gasLimit,
+          this.gasState.gasRefund,
+        )
+        if (result.exceptionError !== undefined) {
+          await this.stateManager.revert()
+          this.gasState.gasRefund = gasRefundSnapshot
+          return result
+        }
+
+        await this.stateManager.commit()
+        return result
+      }
+
+      const code = await this.stateManager.getCode(options.target)
       const result = await new QRLInterpreter({
         stateManager: this.stateManager,
         context,
