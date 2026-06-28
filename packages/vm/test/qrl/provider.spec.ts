@@ -153,8 +153,32 @@ describe('QRLLocalProvider', () => {
       '0x2a',
     )
 
+    const pendingBlock = (await provider.request({
+      method: 'qrl_getBlockByNumber',
+      params: ['pending', false],
+    })) as { number: string; transactions: string[]; receipts: Array<{ status: string }> }
+
+    assert.strictEqual(pendingBlock.number, '0x1')
+    assert.strictEqual(pendingBlock.transactions.length, 1)
+    assert.strictEqual(pendingBlock.receipts[0].status, '0x1')
+    assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
+
+    const pendingBlockWithTxs = (await provider.request({
+      method: 'qrl_getBlockByNumber',
+      params: ['pending', true],
+    })) as { transactions: Array<{ from: string; to: string }> }
+    assert.strictEqual(pendingBlockWithTxs.transactions[0].from, sender.toString())
+    assert.strictEqual(pendingBlockWithTxs.transactions[0].to, receiver.toString())
+
     await provider.request({ method: 'qrl_mine' })
 
+    const latestBlock = (await provider.request({
+      method: 'qrl_getBlockByNumber',
+      params: ['latest', false],
+    })) as { number: string; transactions: string[] }
+
+    assert.strictEqual(latestBlock.number, pendingBlock.number)
+    assert.deepEqual(latestBlock.transactions, pendingBlock.transactions)
     assert.strictEqual(
       await provider.request({
         method: 'qrl_getTransactionCount',

@@ -101,6 +101,14 @@ export class QRLLocalChain {
     return this.pendingStateManager ?? this.stateManager
   }
 
+  public async getPendingBlock(options: QRLMineBlockOptions = {}): Promise<blockQrl.QRLBlock> {
+    return this.buildBlockWithPending(
+      this.pending,
+      options,
+      this.pendingStateManager ?? this.stateManager,
+    )
+  }
+
   public async runTx(options: QRLLocalChainRunTxOptions): Promise<QRLLocalChainRunTxResult> {
     const shouldMine = options.mine ?? this.automine
     const stateManager = shouldMine ? this.stateManager : this.ensurePendingStateManager()
@@ -202,6 +210,22 @@ export class QRLLocalChain {
     options: QRLMineBlockOptions = {},
     stateManager: stateQrl.QRLStateManager,
   ): Promise<blockQrl.QRLBlock> {
+    const block = await this.buildBlockWithPending(pending, options, stateManager)
+
+    this.indexBlock(block)
+    for (const [index, entry] of pending.entries()) {
+      const txHash = qrlLookupKey(entry.tx.hash())
+      this.transactionsByHash.set(txHash, entry.tx)
+      this.receiptsByTxHash.set(txHash, block.receipts[index])
+    }
+    return block
+  }
+
+  private async buildBlockWithPending(
+    pending: readonly PendingQRLTransaction[],
+    options: QRLMineBlockOptions = {},
+    stateManager: stateQrl.QRLStateManager,
+  ): Promise<blockQrl.QRLBlock> {
     const latest = this.getLatestBlock()
     let cumulativeGasUsed = 0n
     const receipts = pending.map((entry, index) => {
@@ -246,19 +270,12 @@ export class QRLLocalChain {
       logIndexStart += receipt.logs.length
       return included
     })
-    const block = new blockQrl.QRLBlock({
+
+    return new blockQrl.QRLBlock({
       header: draftBlock.header,
       transactions,
       receipts: includedReceipts,
     })
-
-    this.indexBlock(block)
-    for (const [index, entry] of pending.entries()) {
-      const txHash = qrlLookupKey(entry.tx.hash())
-      this.transactionsByHash.set(txHash, entry.tx)
-      this.receiptsByTxHash.set(txHash, block.receipts[index])
-    }
-    return block
   }
 
   private ensurePendingStateManager(): stateQrl.QRLStateManager {

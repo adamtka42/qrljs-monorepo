@@ -315,7 +315,7 @@ export class QRLLocalProvider {
 
   private async getBlockByNumber(params: unknown[]): Promise<unknown> {
     expectParamRange('qrl_getBlockByNumber', params, 1, 2)
-    const block = this.resolveBlock(params[0])
+    const block = await this.resolveBlock(params[0])
     return block === undefined ? null : formatQRLBlock(block, parseIncludeTransactions(params[1]))
   }
 
@@ -381,9 +381,12 @@ export class QRLLocalProvider {
     return this.chain.stateManager
   }
 
-  private resolveBlock(value: unknown) {
+  private async resolveBlock(value: unknown) {
     if (value === 'latest') {
       return this.chain.getLatestBlock()
+    }
+    if (value === 'pending') {
+      return this.chain.getPendingBlock()
     }
     if (value === 'earliest') {
       return this.chain.getBlockByNumber(0n)
