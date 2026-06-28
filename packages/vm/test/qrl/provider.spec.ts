@@ -95,6 +95,46 @@ describe('QRLLocalProvider', () => {
     assert.strictEqual(blockByHash.number, '0x1')
   })
 
+  it('accepts pending transaction count requests for queued local transactions', async () => {
+    const sender = address(1)
+    const receiver = address(2)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      automine: false,
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'pending'],
+      }),
+      '0x0',
+    )
+
+    await provider.request({
+      method: 'qrl_sendTransaction',
+      params: [
+        {
+          from: sender.toString(),
+          to: receiver.toString(),
+          gas: '0x5208',
+          maxFeePerGas: '0x0',
+          maxPriorityFeePerGas: '0x0',
+        },
+      ],
+    })
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'pending'],
+      }),
+      '0x1',
+    )
+    assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
+  })
+
   it('supports code, storage, qrl_call, mining, snapshots, and revert', async () => {
     const sender = address(1)
     const contract = address(3)

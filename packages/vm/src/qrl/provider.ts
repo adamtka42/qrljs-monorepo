@@ -118,7 +118,7 @@ export class QRLLocalProvider {
   private async getTransactionCount(params: unknown[]): Promise<string> {
     expectParamRange('qrl_getTransactionCount', params, 1, 2)
     const address = parseAddress(params[0])
-    assertLatestBlockTag(params[1])
+    assertLatestOrPendingBlockTag(params[1])
     return qrlQuantity(await this.chain.stateManager.getNonce(address))
   }
 
@@ -619,6 +619,15 @@ function assertLatestBlockTag(value: unknown): void {
     return
   }
   throw invalidParams('Only latest block tag is supported for this QRL local provider method')
+}
+
+function assertLatestOrPendingBlockTag(value: unknown): void {
+  if (value === undefined || value === 'latest' || value === 'pending') {
+    return
+  }
+  throw invalidParams(
+    'Only latest and pending block tags are supported for this QRL local provider method',
+  )
 }
 
 function parseIncludeTransactions(value: unknown): boolean {
