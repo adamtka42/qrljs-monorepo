@@ -95,7 +95,7 @@ describe('QRLLocalProvider', () => {
     assert.strictEqual(blockByHash.number, '0x1')
   })
 
-  it('accepts pending transaction count requests for queued local transactions', async () => {
+  it('separates latest and pending state for queued local transactions', async () => {
     const sender = address(1)
     const receiver = address(2)
     const provider = new qrl.QRLLocalProvider({
@@ -121,10 +121,19 @@ describe('QRLLocalProvider', () => {
           gas: '0x5208',
           maxFeePerGas: '0x0',
           maxPriorityFeePerGas: '0x0',
+          value: '0x2a',
         },
       ],
     })
 
+    assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'latest'],
+      }),
+      '0x0',
+    )
     assert.strictEqual(
       await provider.request({
         method: 'qrl_getTransactionCount',
@@ -132,7 +141,31 @@ describe('QRLLocalProvider', () => {
       }),
       '0x1',
     )
-    assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getBalance', params: [receiver.toString(), 'latest'] }),
+      '0x0',
+    )
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getBalance',
+        params: [receiver.toString(), 'pending'],
+      }),
+      '0x2a',
+    )
+
+    await provider.request({ method: 'qrl_mine' })
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_getTransactionCount',
+        params: [sender.toString(), 'latest'],
+      }),
+      '0x1',
+    )
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getBalance', params: [receiver.toString(), 'latest'] }),
+      '0x2a',
+    )
   })
 
   it('supports code, storage, qrl_call, mining, snapshots, and revert', async () => {

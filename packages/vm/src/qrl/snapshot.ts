@@ -8,6 +8,7 @@ export type QRLChainSnapshotId = bigint
 export interface QRLChainSnapshot {
   id: QRLChainSnapshotId
   stateManager: stateQrl.QRLStateManager
+  pendingStateManager?: stateQrl.QRLStateManager
   latestBlockHash: Uint8Array
   blocksByNumber: Map<string, blockQrl.QRLBlock>
   blocksByHash: Map<string, blockQrl.QRLBlock>

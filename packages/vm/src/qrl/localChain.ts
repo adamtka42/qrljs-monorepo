@@ -48,6 +48,9 @@ export class QRLLocalChain {
   public stateManager: stateQrl.QRLStateManager
   public evm: evmQrl.QRLEVM
 
+  private pendingStateManager?: stateQrl.QRLStateManager
+  private pendingEvm?: evmQrl.QRLEVM
+
   private readonly automine: boolean
   private readonly context?: QRLRunTxContext
   private latestBlockHash: Uint8Array
@@ -94,17 +97,24 @@ export class QRLLocalChain {
     return this.receiptsByTxHash.get(qrlLookupKey(hash))
   }
 
+  public getPendingStateManager(): stateQrl.QRLStateManager {
+    return this.pendingStateManager ?? this.stateManager
+  }
+
   public async runTx(options: QRLLocalChainRunTxOptions): Promise<QRLLocalChainRunTxResult> {
+    const shouldMine = options.mine ?? this.automine
+    const stateManager = shouldMine ? this.stateManager : this.ensurePendingStateManager()
+    const evm = shouldMine ? this.evm : this.ensurePendingEvm(stateManager)
     const runTxResult = await runQRLTx({
       ...options,
-      stateManager: this.stateManager,
-      evm: this.evm,
+      stateManager,
+      evm,
       context: options.context ?? nextBlockContext(this.context, this.getLatestBlock()),
     })
     const pending = { tx: options.tx, result: runTxResult }
 
-    if (options.mine ?? this.automine) {
-      const block = await this.mineBlockWithPending([pending])
+    if (shouldMine) {
+      const block = await this.mineBlockWithPending([pending], {}, this.stateManager)
       return {
         runTxResult,
         transaction: options.tx,
@@ -123,8 +133,19 @@ export class QRLLocalChain {
 
   public async mineBlock(options: QRLMineBlockOptions = {}): Promise<blockQrl.QRLBlock> {
     const pending = this.pending
+    const pendingStateManager = this.pendingStateManager
     this.pending = []
-    return this.mineBlockWithPending(pending, options)
+
+    if (pending.length === 0 || pendingStateManager === undefined) {
+      return this.mineBlockWithPending(pending, options, this.stateManager)
+    }
+
+    const block = await this.mineBlockWithPending(pending, options, pendingStateManager)
+    this.stateManager = pendingStateManager
+    this.evm = new evmQrl.QRLEVM({ stateManager: this.stateManager })
+    this.pendingStateManager = undefined
+    this.pendingEvm = undefined
+    return block
   }
 
   public async snapshot(): Promise<QRLChainSnapshotId> {
@@ -132,6 +153,7 @@ export class QRLLocalChain {
     this.snapshots.set(id.toString(10), {
       id,
       stateManager: this.stateManager.shallowCopy(),
+      pendingStateManager: this.pendingStateManager?.shallowCopy(),
       latestBlockHash: new Uint8Array(this.latestBlockHash),
       blocksByNumber: cloneQRLMap(this.blocksByNumber),
       blocksByHash: cloneQRLMap(this.blocksByHash),
@@ -152,6 +174,11 @@ export class QRLLocalChain {
 
     this.stateManager = snapshot.stateManager.shallowCopy()
     this.evm = new evmQrl.QRLEVM({ stateManager: this.stateManager })
+    this.pendingStateManager = snapshot.pendingStateManager?.shallowCopy()
+    this.pendingEvm =
+      this.pendingStateManager === undefined
+        ? undefined
+        : new evmQrl.QRLEVM({ stateManager: this.pendingStateManager })
     this.latestBlockHash = new Uint8Array(snapshot.latestBlockHash)
     this.blocksByNumber = cloneQRLMap(snapshot.blocksByNumber)
     this.blocksByHash = cloneQRLMap(snapshot.blocksByHash)
@@ -173,6 +200,7 @@ export class QRLLocalChain {
   private async mineBlockWithPending(
     pending: readonly PendingQRLTransaction[],
     options: QRLMineBlockOptions = {},
+    stateManager: stateQrl.QRLStateManager,
   ): Promise<blockQrl.QRLBlock> {
     const latest = this.getLatestBlock()
     let cumulativeGasUsed = 0n
@@ -188,7 +216,7 @@ export class QRLLocalChain {
     const transactions = pending.map((entry) => entry.tx)
     const transactionsRoot = await blockQrl.genQRLTransactionsRoot(transactions)
     const receiptsRoot = await blockQrl.genQRLReceiptsRoot(receipts)
-    const stateRoot = await this.stateManager.getStateRoot()
+    const stateRoot = await stateManager.getStateRoot()
 
     const draftBlock = new blockQrl.QRLBlock({
       header: {
@@ -231,6 +259,20 @@ export class QRLLocalChain {
       this.receiptsByTxHash.set(txHash, block.receipts[index])
     }
     return block
+  }
+
+  private ensurePendingStateManager(): stateQrl.QRLStateManager {
+    if (this.pendingStateManager === undefined) {
+      this.pendingStateManager = this.stateManager.shallowCopy()
+    }
+    return this.pendingStateManager
+  }
+
+  private ensurePendingEvm(stateManager: stateQrl.QRLStateManager): evmQrl.QRLEVM {
+    if (this.pendingEvm === undefined) {
+      this.pendingEvm = new evmQrl.QRLEVM({ stateManager })
+    }
+    return this.pendingEvm
   }
 
   private indexBlock(block: blockQrl.QRLBlock): void {

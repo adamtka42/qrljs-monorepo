@@ -1,4 +1,6 @@
 import type { qrl as blockQrl } from '@theqrl/block'
+import { qrl as evmQrl } from '@theqrl/evm'
+import type { qrl as stateQrl } from '@theqrl/statemanager'
 import { qrl as txQrl } from '@theqrl/tx'
 import { bytesToHex, hexToBytes, qrl } from '@theqrl/util'
 
@@ -111,37 +113,33 @@ export class QRLLocalProvider {
   private async getBalance(params: unknown[]): Promise<string> {
     expectParamRange('qrl_getBalance', params, 1, 2)
     const address = parseAddress(params[0])
-    assertLatestBlockTag(params[1])
-    return qrlQuantity(await this.chain.stateManager.getBalance(address))
+    return qrlQuantity(await this.resolveStateManager(params[1], true).getBalance(address))
   }
 
   private async getTransactionCount(params: unknown[]): Promise<string> {
     expectParamRange('qrl_getTransactionCount', params, 1, 2)
     const address = parseAddress(params[0])
-    assertLatestOrPendingBlockTag(params[1])
-    return qrlQuantity(await this.chain.stateManager.getNonce(address))
+    return qrlQuantity(await this.resolveStateManager(params[1], true).getNonce(address))
   }
 
   private async getCode(params: unknown[]): Promise<string> {
     expectParamRange('qrl_getCode', params, 1, 2)
     const address = parseAddress(params[0])
-    assertLatestBlockTag(params[1])
-    return qrlData(await this.chain.stateManager.getCode(address))
+    return qrlData(await this.resolveStateManager(params[1], true).getCode(address))
   }
 
   private async getStorageAt(params: unknown[]): Promise<string> {
     expectParamRange('qrl_getStorageAt', params, 2, 3)
     const address = parseAddress(params[0])
     const key = parseFixedBytes('QRL storage key', params[1], 32)
-    assertLatestBlockTag(params[2])
-    return qrlData(await this.chain.stateManager.getStorage(address, key))
+    return qrlData(await this.resolveStateManager(params[2], true).getStorage(address, key))
   }
 
   private async sendTransaction(params: unknown[]): Promise<string> {
     expectParamCount('qrl_sendTransaction', params, 1)
     const request = parseTransactionRequest(params[0])
     const sender = parseAddress(request.from)
-    const tx = await this.createTransaction(request, sender)
+    const tx = await this.createTransaction(request, sender, this.chain.getPendingStateManager())
     const result = await this.chain.runTx({ tx, sender })
     return qrlHash(result.transaction.hash())
   }
@@ -225,7 +223,7 @@ export class QRLLocalProvider {
     if (request.to === undefined) {
       throw invalidParams('qrl_call requires a QRL to address')
     }
-    assertLatestBlockTag(params[1])
+    const stateManager = this.resolveStateManager(params[1], true)
 
     const sender = parseAddress(request.from)
     const to = parseAddress(request.to)
@@ -234,9 +232,14 @@ export class QRLLocalProvider {
     const data = parseOptionalData(request.data)
     const latest = this.chain.getLatestBlock()
 
-    await this.chain.stateManager.checkpoint()
+    const evm =
+      stateManager === this.chain.stateManager
+        ? this.chain.evm
+        : new evmQrl.QRLEVM({ stateManager })
+
+    await stateManager.checkpoint()
     try {
-      const result = await this.chain.evm.runCall({
+      const result = await evm.runCall({
         to,
         caller: sender,
         origin: sender,
@@ -349,11 +352,12 @@ export class QRLLocalProvider {
   private async createTransaction(
     request: QRLProviderTransactionRequest,
     sender: qrl.QRLAddress,
+    stateManager: stateQrl.QRLStateManager = this.chain.stateManager,
   ): Promise<txQrl.QRLDynamicFeeTransaction> {
     const chainId = this.defaultContext.chainId
     const nonce =
       request.nonce === undefined
-        ? await this.chain.stateManager.getNonce(sender)
+        ? await stateManager.getNonce(sender)
         : parseQuantity(request.nonce, 'nonce')
 
     return new txQrl.QRLDynamicFeeTransaction({
@@ -366,6 +370,15 @@ export class QRLLocalProvider {
       value: parseOptionalQuantity(request.value, 0n, 'value'),
       data: parseOptionalData(request.data),
     })
+  }
+
+  private resolveStateManager(value: unknown, allowPending: boolean): stateQrl.QRLStateManager {
+    if (allowPending) {
+      assertLatestOrPendingBlockTag(value)
+      return value === 'pending' ? this.chain.getPendingStateManager() : this.chain.stateManager
+    }
+    assertLatestBlockTag(value)
+    return this.chain.stateManager
   }
 
   private resolveBlock(value: unknown) {

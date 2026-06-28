@@ -72,12 +72,19 @@ describe('QRLLocalChain', () => {
     assert.strictEqual(chain.getBlockNumber(), 0n)
     assert.strictEqual(chain.getTransaction(transaction.hash()), transaction)
     assert.strictEqual(chain.getReceipt(transaction.hash()), undefined)
+    assert.strictEqual(await chain.stateManager.getNonce(sender), 0n)
+    assert.strictEqual(await chain.getPendingStateManager().getNonce(sender), 1n)
 
     const block = await chain.mineBlock()
 
     assert.strictEqual(block.header.number, 1n)
     assert.strictEqual(block.transactions[0], transaction)
     assert.strictEqual(chain.getReceipt(transaction.hash()), block.receipts[0])
+    assert.strictEqual(await chain.stateManager.getNonce(sender), 1n)
+    assert.strictEqual(
+      bytesToHex(block.header.stateRoot),
+      bytesToHex(await chain.stateManager.getStateRoot()),
+    )
   })
 
   it('mines empty blocks with parent tracking', async () => {
