@@ -16,6 +16,7 @@ import type {
   QRLLocalProviderRequest,
   QRLProviderTransactionRequest,
 } from './providerTypes.ts'
+import { runQRLTx } from './runTx.ts'
 
 import type { PrefixedHexString } from '@theqrl/util'
 
@@ -70,6 +71,8 @@ export class QRLLocalProvider {
         return this.sendTransaction(params)
       case 'qrl_call':
         return this.call(params)
+      case 'qrl_estimateGas':
+        return this.estimateGas(params)
       case 'qrl_getTransactionByHash':
         return this.getTransactionByHash(params)
       case 'qrl_getTransactionReceipt':
@@ -137,6 +140,79 @@ export class QRLLocalProvider {
     const tx = await this.createTransaction(request, sender)
     const result = await this.chain.runTx({ tx, sender })
     return qrlHash(result.transaction.hash())
+  }
+
+  private async estimateGas(params: unknown[]): Promise<string> {
+    expectParamRange('qrl_estimateGas', params, 1, 2)
+    const request = parseTransactionRequest(params[0])
+    assertLatestBlockTag(params[1])
+
+    const sender = parseAddress(request.from)
+    const requestedGas = parseOptionalGasLimit(request)
+    const latest = this.chain.getLatestBlock()
+    const blockGasLimit = this.defaultContext.gasLimit ?? latest.header.gasLimit
+    const upperBound = requestedGas ?? blockGasLimit
+
+    if (upperBound === 0n) {
+      throw new QRLProviderError(-32000, 'QRL gas estimation failed: gas limit is zero')
+    }
+
+    if (!(await this.canExecuteWithGas(request, sender, upperBound))) {
+      throw new QRLProviderError(-32000, 'QRL gas estimation failed')
+    }
+
+    let low = 0n
+    let high = upperBound
+    while (low + 1n < high) {
+      const mid = (low + high) / 2n
+      if (await this.canExecuteWithGas(request, sender, mid)) {
+        high = mid
+      } else {
+        low = mid
+      }
+    }
+
+    return qrlQuantity(high)
+  }
+
+  private async canExecuteWithGas(
+    request: QRLProviderTransactionRequest,
+    sender: qrl.QRLAddress,
+    gasLimit: bigint,
+  ): Promise<boolean> {
+    const tx = await this.createTransaction(
+      { ...request, gas: gasLimit, gasLimit: undefined },
+      sender,
+    )
+    await this.chain.stateManager.checkpoint()
+    try {
+      const result = await runQRLTx({
+        tx,
+        sender,
+        stateManager: this.chain.stateManager,
+        evm: this.chain.evm,
+        context: this.nextExecutionContext(),
+        skipBalance: true,
+        skipNonce: true,
+      })
+      return result.executionError === undefined
+    } catch {
+      return false
+    } finally {
+      await this.chain.stateManager.revert()
+    }
+  }
+
+  private nextExecutionContext(): QRLRunTxContext {
+    const latest = this.chain.getLatestBlock()
+    return {
+      ...this.defaultContext,
+      blockNumber: latest.header.number + 1n,
+      timestamp: this.defaultContext.timestamp ?? latest.header.timestamp + 1n,
+      gasLimit: this.defaultContext.gasLimit ?? latest.header.gasLimit,
+      baseFee: this.defaultContext.baseFee ?? latest.header.baseFee,
+      coinbase: this.defaultContext.coinbase ?? latest.header.coinbase,
+    }
   }
 
   private async call(params: unknown[]): Promise<string> {
@@ -332,6 +408,15 @@ function parseGasLimit(request: QRLProviderTransactionRequest): bigint {
     throw invalidParams('QRL gas and gasLimit cannot differ')
   }
   return gas ?? gasLimit ?? DEFAULT_GAS_LIMIT
+}
+
+function parseOptionalGasLimit(request: QRLProviderTransactionRequest): bigint | undefined {
+  const gas = parseOptionalQuantity(request.gas, undefined, 'gas')
+  const gasLimit = parseOptionalQuantity(request.gasLimit, undefined, 'gasLimit')
+  if (gas !== undefined && gasLimit !== undefined && gas !== gasLimit) {
+    throw invalidParams('QRL gas and gasLimit cannot differ')
+  }
+  return gas ?? gasLimit
 }
 
 function parseOptionalQuantity(

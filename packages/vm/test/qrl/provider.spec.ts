@@ -132,6 +132,99 @@ describe('QRLLocalProvider', () => {
     assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
   })
 
+  it('estimates gas for transfers, calls, and contract creation without changing state', async () => {
+    const sender = address(1)
+    const receiver = address(2)
+    const contract = address(3)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_estimateGas',
+        params: [
+          {
+            from: sender.toString(),
+            to: receiver.toString(),
+            value: '0x1',
+            maxFeePerGas: '0x0',
+            maxPriorityFeePerGas: '0x0',
+          },
+        ],
+      }),
+      '0x5208',
+    )
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getTransactionCount', params: [sender.toString()] }),
+      '0x0',
+    )
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getBalance', params: [receiver.toString()] }),
+      '0x0',
+    )
+
+    await provider.chain.stateManager.putCode(
+      contract,
+      new Uint8Array([0x60, 0x2a, 0x60, 0x00, 0x52, 0x60, 0x40, 0x60, 0x00, 0xf3]),
+    )
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_estimateGas',
+        params: [
+          {
+            from: sender.toString(),
+            to: contract.toString(),
+            gas: '0x186a0',
+            maxFeePerGas: '0x0',
+            maxPriorityFeePerGas: '0x0',
+          },
+        ],
+      }),
+      '0x521a',
+    )
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_estimateGas',
+        params: [
+          {
+            from: sender.toString(),
+            data: '0x602a60005260406000f3',
+            maxFeePerGas: '0x0',
+            maxPriorityFeePerGas: '0x0',
+          },
+        ],
+      }),
+      '0xcfa4',
+    )
+  })
+
+  it('rejects gas estimation when the requested cap cannot execute the transaction', async () => {
+    const sender = address(1)
+    const receiver = address(2)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    await expect(
+      provider.request({
+        method: 'qrl_estimateGas',
+        params: [
+          {
+            from: sender.toString(),
+            to: receiver.toString(),
+            gas: '0x5207',
+            maxFeePerGas: '0x0',
+            maxPriorityFeePerGas: '0x0',
+          },
+        ],
+      }),
+    ).rejects.toMatchObject({ code: -32000 })
+  })
+
   it('reverts only its own qrl_call checkpoint on execution errors', async () => {
     const sender = address(1)
     const contract = address(4)
