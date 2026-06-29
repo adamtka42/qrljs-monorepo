@@ -448,6 +448,30 @@ describe('QRLLocalProvider', () => {
     await provider.chain.stateManager.revert()
   })
 
+  it('includes revert return data in qrl_call provider errors', async () => {
+    const sender = address(1)
+    const contract = address(4)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      defaultContext: { chainId: 1n, gasLimit: 1000n, noBaseFee: true },
+    })
+
+    await provider.chain.stateManager.putCode(
+      contract,
+      new Uint8Array([0x60, 0x2a, 0x60, 0x00, 0x53, 0x60, 0x01, 0x60, 0x00, 0xfd]),
+    )
+
+    await expect(
+      provider.request({
+        method: 'qrl_call',
+        params: [{ from: sender.toString(), to: contract.toString(), gasLimit: '0xc350' }],
+      }),
+    ).rejects.toMatchObject({
+      code: -32000,
+      data: '0x2a',
+    })
+  })
+
   it('rejects invalid methods and params', async () => {
     const sender = address(1)
     const provider = new qrl.QRLLocalProvider({

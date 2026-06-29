@@ -255,11 +255,15 @@ export class QRLLocalProvider {
         },
       })
       if (result.exceptionError !== undefined) {
-        throw new QRLProviderError(-32000, result.exceptionError.message)
+        throw new QRLProviderError(
+          -32000,
+          result.exceptionError.message,
+          qrlData(result.returnValue),
+        )
       }
       return qrlData(result.returnValue)
     } finally {
-      await this.chain.stateManager.revert()
+      await stateManager.revert()
     }
   }
 
