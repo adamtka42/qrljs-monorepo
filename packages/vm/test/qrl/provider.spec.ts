@@ -237,6 +237,90 @@ describe('QRLLocalProvider', () => {
     assert.strictEqual(await provider.request({ method: 'qrl_blockNumber' }), '0x0')
   })
 
+  it('runs qrl_call as normal execution and rolls storage writes back', async () => {
+    const sender = address(1)
+    const contract = address(3)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+    const key = new Uint8Array(32)
+    key[31] = 1
+
+    await provider.chain.stateManager.putCode(
+      contract,
+      new Uint8Array([
+        0x60, 0x2a, 0x60, 0x01, 0x55, 0x60, 0x7b, 0x5f, 0x52, 0x60, 0x40, 0x5f, 0xf3,
+      ]),
+    )
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_call',
+        params: [{ from: sender.toString(), to: contract.toString(), gas: '0x186a0' }],
+      }),
+      `0x${'00'.repeat(63)}7b`,
+    )
+    assert.strictEqual((await provider.chain.stateManager.getStorage(contract, key))[63], 0)
+  })
+
+  it('allows qrl_call to emit logs without persisting a receipt', async () => {
+    const sender = address(1)
+    const contract = address(3)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    await provider.chain.stateManager.putCode(contract, logCode(0x7b))
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_call',
+        params: [{ from: sender.toString(), to: contract.toString(), gas: '0x186a0' }],
+      }),
+      '0x',
+    )
+    assert.deepEqual(await provider.request({ method: 'qrl_getLogs', params: [{}] }), [])
+  })
+
+  it('makes qrl_call value visible during execution and rolls balances back', async () => {
+    const sender = address(1)
+    const contract = address(3)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    await provider.chain.stateManager.putCode(
+      contract,
+      new Uint8Array([0x47, 0x5f, 0x52, 0x60, 0x40, 0x5f, 0xf3]),
+    )
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_call',
+        params: [
+          {
+            from: sender.toString(),
+            to: contract.toString(),
+            gas: '0x186a0',
+            value: '0x2a',
+          },
+        ],
+      }),
+      `0x${'00'.repeat(63)}2a`,
+    )
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getBalance', params: [sender.toString()] }),
+      '0x3e8',
+    )
+    assert.strictEqual(
+      await provider.request({ method: 'qrl_getBalance', params: [contract.toString()] }),
+      '0x0',
+    )
+  })
+
   it('estimates gas for transfers, calls, and contract creation without changing state', async () => {
     const sender = address(1)
     const receiver = address(2)

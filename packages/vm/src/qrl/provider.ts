@@ -20,7 +20,7 @@ import type {
   QRLLocalProviderRequest,
   QRLProviderTransactionRequest,
 } from './providerTypes.ts'
-import { runQRLTx } from './runTx.ts'
+import { effectiveQrlGasPrice, runQRLTx } from './runTx.ts'
 
 import type { PrefixedHexString } from '@theqrl/util'
 
@@ -226,11 +226,18 @@ export class QRLLocalProvider {
     const stateManager = this.resolveStateManager(params[1], true)
 
     const sender = parseAddress(request.from)
-    const to = parseAddress(request.to)
-    const value = parseOptionalQuantity(request.value, 0n, 'value')
-    const gasLimit = parseGasLimit(request)
-    const data = parseOptionalData(request.data)
+    const tx = await this.createTransaction(request, sender, stateManager)
     const latest = this.chain.getLatestBlock()
+    const baseFee = this.defaultContext.baseFee ?? latest.header.baseFee
+    const gasPrice = effectiveQrlGasPrice(tx, {
+      chainId: tx.chainId,
+      baseFee,
+      coinbase: this.defaultContext.coinbase ?? latest.header.coinbase,
+      blockNumber: latest.header.number,
+      timestamp: this.defaultContext.timestamp ?? latest.header.timestamp,
+      gasLimit: this.defaultContext.gasLimit ?? latest.header.gasLimit,
+      noBaseFee: this.defaultContext.noBaseFee ?? true,
+    })
 
     const evm =
       stateManager === this.chain.stateManager
@@ -239,19 +246,26 @@ export class QRLLocalProvider {
 
     await stateManager.checkpoint()
     try {
+      if (tx.value > 0n) {
+        await stateManager.subBalance(sender, tx.value)
+        await stateManager.addBalance(tx.to!, tx.value)
+      }
+
       const result = await evm.runCall({
-        to,
+        to: tx.to!,
         caller: sender,
         origin: sender,
-        data,
-        value,
-        gasLimit,
-        isStatic: true,
+        data: tx.data,
+        value: tx.value,
+        gasLimit: tx.gasLimit,
         context: {
           coinbase: this.defaultContext.coinbase ?? latest.header.coinbase,
           blockNumber: latest.header.number,
           timestamp: this.defaultContext.timestamp ?? latest.header.timestamp,
           gasLimit: this.defaultContext.gasLimit ?? latest.header.gasLimit,
+          chainId: tx.chainId,
+          baseFee,
+          gasPrice,
         },
       })
       if (result.exceptionError !== undefined) {
