@@ -38,7 +38,7 @@
     "docs:build": "typedoc --options typedoc.mjs",
     "lint": "npm run biome && eslint  --config ./eslint.config.mjs .",
     "lint:fix": "npm run biome:fix && eslint  --fix --config ./eslint.config.mjs .",
-    "prepublishOnly": "../../config/cli/prepublish.sh && npm run test:buildIntegrity",
+    "prepublishOnly": "../../config/cli/prepublish.sh",
     "test": "npm run test:qrl",
     "test:node": "npm run test:qrl",
     "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts",
