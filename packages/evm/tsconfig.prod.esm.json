@@ -4,14 +4,13 @@
     "rootDir": "src",
     "outDir": "dist/esm"
   },
-  "include": ["src/**/*.ts", "src/**/*.json"],
+  "include": ["src/index.ts", "src/qrl/**/*.ts"],
   "references": [
-    { "path": "../binarytree/tsconfig.prod.esm.json" },
-    { "path": "../common/tsconfig.prod.esm.json" },
-    { "path": "../rlp/tsconfig.prod.esm.json" },
-    { "path": "../statemanager/tsconfig.prod.esm.json" },
-    { "path": "../mpt/tsconfig.prod.esm.json" },
-    { "path": "../tx/tsconfig.prod.esm.json" },
-    { "path": "../util/tsconfig.prod.esm.json" }
+    {
+      "path": "../statemanager/tsconfig.prod.esm.json"
+    },
+    {
+      "path": "../util/tsconfig.prod.esm.json"
+    }
   ]
 }

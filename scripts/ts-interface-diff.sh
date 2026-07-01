@@ -8,11 +8,11 @@ set -e
 # 
 # Note: this script assumes that the d.ts files live under ./dist directory.
 # 
-# Usage: ./scripts/ts-interface-diff.sh ethereumjs-vm packages/vm/
+# Usage: ./scripts/ts-interface-diff.sh @theqrl/vm packages/vm/
 # Run from repository root
 # 
 # To send stdout to VS Code to leverage better tools to visualize diff, you can run:
-# ./scripts/ts-interface-diff.sh ethereumjs-blockchain packages/blockchain/ | code-
+# ./scripts/ts-interface-diff.sh @theqrl/vm packages/vm/ | code-
 # 
 
 PACKAGE_NAME=$1
@@ -56,8 +56,8 @@ git diff --no-index -- $A_PATH $B_PATH
 
 ###
 # After running this script, you can just run the standalone command:
-# git diff --no-index -- .tmp/ethereumjs-vm/A .tmp/ethereumjs-vm/B
+# git diff --no-index -- .tmp/@theqrl/vm/A .tmp/@theqrl/vm/B
 # 
 # or variations of it:
-# git diff --word-diff=color --no-index -- .tmp/ethereumjs-vm/A .tmp/ethereumjs-vm/B
+# git diff --word-diff=color --no-index -- .tmp/@theqrl/vm/A .tmp/@theqrl/vm/B
 ###

@@ -1,6 +1,6 @@
-import { bytesToBigInt } from '@ethereumjs/util'
+import { bytesToBigInt, bytesToHex, concatBytes } from '@theqrl/util'
 
-const bytesValue = new Uint8Array([97])
-const bigIntValue = bytesToBigInt(bytesValue)
+const payload = concatBytes(new Uint8Array([1, 2]), new Uint8Array([3]))
+const value = bytesToBigInt(payload)
 
-console.log(`Converted value: ${bigIntValue}`)
+process.stdout.write(bytesToHex(payload) + ' ' + value + '\n')

@@ -106,7 +106,7 @@ Temporary Items
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-# ethereumjs
+# Local node data
 datadir*
 
 ## Vite

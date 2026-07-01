@@ -4,11 +4,10 @@
     "rootDir": "src",
     "outDir": "dist/esm"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/index.ts", "src/qrl/**/*.ts"],
   "references": [
-    { "path": "../common/tsconfig.prod.esm.json" },
-    { "path": "../mpt/tsconfig.prod.esm.json" },
-    { "path": "../util/tsconfig.prod.esm.json" },
-    { "path": "../binarytree/tsconfig.prod.esm.json" }
+    {
+      "path": "../util/tsconfig.prod.esm.json"
+    }
   ]
 }

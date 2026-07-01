@@ -1,22 +1,21 @@
 {
-  "name": "@ethereumjs/block",
+  "name": "@theqrl/block",
   "version": "10.1.2",
-  "description": "Provides Block serialization and help functions",
-  "keywords": ["ethereum", "block"],
-  "homepage": "https://github.com/ethereumjs/ethereumjs-monorepo/tree/master/packages/block#readme",
+  "description": "QRL block, header, log, receipt, and root helpers",
+  "keywords": ["qrl", "block"],
+  "homepage": "https://github.com/adamtka42/qrljs-monorepo/tree/qrl-adaptation/packages/block#readme",
   "bugs": {
-    "url": "https://github.com/ethereumjs/ethereumjs-monorepo/issues?q=is%3Aissue+label%3A%22package%3A+block%22"
+    "url": "https://github.com/adamtka42/qrljs-monorepo/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ethereumjs/ethereumjs-monorepo.git"
+    "url": "https://github.com/adamtka42/qrljs-monorepo.git",
+    "directory": "packages/block"
   },
   "license": "MPL-2.0",
-  "author": "mjbecze (mb@ethdev.com)",
-  "type": "module",
+  "author": "QRL JS contributors",
   "sideEffects": false,
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "type": "module",
   "exports": {
     ".": {
       "import": {
@@ -26,43 +25,36 @@
       "require": "./dist/cjs/index.js"
     }
   },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "files": ["dist", "src"],
   "scripts": {
     "biome": "npx @biomejs/biome check",
     "biome:fix": "npx @biomejs/biome check --write",
     "build": "../../config/cli/ts-build.sh",
     "clean": "../../config/cli/clean-package.sh",
-    "coverage": "DEBUG=ethjs npx vitest run -c ../../config/vitest.config.coverage.mts",
-    "coverage:istanbul": "DEBUG=ethjs npx vitest run -c ../../config/vitest.config.coverage.istanbul.mts",
+    "coverage": "npx vitest run test/qrl -c ../../config/vitest.config.coverage.mts",
     "docs:build": "typedoc --options typedoc.mjs",
-    "examples": "tsx ../../scripts/examples-runner.ts -- block",
-    "examples:build": "npx embedme README.md",
     "lint": "npm run biome && eslint  --config ./eslint.config.mjs .",
     "lint:fix": "npm run biome:fix && eslint  --fix --config ./eslint.config.mjs .",
     "prepublishOnly": "../../config/cli/prepublish.sh",
     "sc": "npm run spellcheck",
     "spellcheck": "npm run spellcheck:ts && npm run spellcheck:md",
-    "spellcheck:ts": "npx cspell --gitignore -c ../../config/cspell-ts.json \"./**/*.ts\" --cache --show-suggestions --show-context",
     "spellcheck:md": "npx cspell --gitignore -c ../../config/cspell-md.json \"**.md\" --cache --show-suggestions --show-context",
-    "test": "npm run test:node && npm run test:browser",
-    "test:browser": "npx vitest run --config=../../config/vitest.config.browser.mts",
-    "test:node": "npx vitest run -c ../../config/vitest.config.mts",
+    "spellcheck:ts": "npx cspell --gitignore -c ../../config/cspell-ts.json \"./**/*.ts\" --cache --show-suggestions --show-context",
+    "test": "npm run test:qrl",
+    "test:node": "npm run test:qrl",
+    "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts",
     "tsc": "../../config/cli/ts-compile.sh"
   },
   "dependencies": {
-    "@ethereumjs/common": "^10.1.2",
-    "@ethereumjs/rlp": "^10.1.2",
-    "@ethereumjs/mpt": "^10.1.2",
-    "@ethereumjs/tx": "^10.1.2",
-    "@ethereumjs/util": "^10.1.2",
-    "@noble/curves": "^2.0.1",
-    "@noble/hashes": "^2.0.1"
+    "@noble/hashes": "^2.0.1",
+    "@theqrl/mpt": "^10.1.2",
+    "@theqrl/rlp": "^10.1.2",
+    "@theqrl/tx": "^10.1.2",
+    "@theqrl/util": "^10.1.2"
   },
-  "devDependencies": {
-    "@ethereumjs/testdata": "1.0.0",
-    "@paulmillr/trusted-setups": "^0.2.0",
-    "micro-eth-signer": "^0.15.0"
-  },
+  "devDependencies": {},
   "engines": {
     "node": ">=20"
   }

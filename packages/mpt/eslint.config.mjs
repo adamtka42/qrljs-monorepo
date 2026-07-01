@@ -14,10 +14,4 @@ export default [
       },
     },
   },
-  {
-    files: ['benchmarks/*.ts', 'examples/**/*'],
-    rules: {
-      'no-console': 'off',
-    },
-  },
 ]

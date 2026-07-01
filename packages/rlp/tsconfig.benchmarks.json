@@ -5,7 +5,7 @@
     "sourceMap": false,
     "declaration": true,
     "esModuleInterop": true,
-    "module": "esnext"
+    "module": "NodeNext"
   },
-  "include": ["benchmarks/**.ts"]
+  "include": ["benchmarks/**.ts", "src/**/*.ts"]
 }

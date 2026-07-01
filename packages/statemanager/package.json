@@ -1,23 +1,22 @@
 {
-  "name": "@ethereumjs/statemanager",
+  "name": "@theqrl/statemanager",
   "version": "10.1.2",
-  "description": "An Ethereum statemanager implementation",
-  "keywords": ["ethereum", "statemanager"],
-  "homepage": "https://github.com/ethereumjs/ethereumjs-monorepo/tree/master/packages/statemanager#readme",
+  "description": "In-memory QRL account, storage, and genesis state manager",
+  "keywords": ["qrl", "statemanager", "state"],
+  "homepage": "https://github.com/adamtka42/qrljs-monorepo/tree/qrl-adaptation/packages/statemanager#readme",
   "bugs": {
-    "url": "https://github.com/ethereumjs/ethereumjs-monorepo/issues?q=is%3Aissue+label%3A%22package%3A+statemanager%22"
+    "url": "https://github.com/adamtka42/qrljs-monorepo/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ethereumjs/ethereumjs-monorepo.git"
+    "url": "https://github.com/adamtka42/qrljs-monorepo.git",
+    "directory": "packages/statemanager"
   },
   "license": "MPL-2.0",
-  "author": "EthereumJS Team",
+  "author": "QRL JS contributors",
   "contributors": ["g11tech <gajinder@g11.in>"],
-  "type": "module",
   "sideEffects": false,
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "type": "module",
   "exports": {
     ".": {
       "import": {
@@ -27,40 +26,29 @@
       "require": "./dist/cjs/index.js"
     }
   },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "files": ["dist", "src"],
   "scripts": {
     "biome": "npx @biomejs/biome check",
     "biome:fix": "npx @biomejs/biome check --write",
     "build": "../../config/cli/ts-build.sh",
     "clean": "../../config/cli/clean-package.sh",
-    "coverage": "DEBUG=ethjs npx vitest run -c ../../config/vitest.config.coverage.mts",
-    "coverage:istanbul": "DEBUG=ethjs npx vitest run -c ../../config/vitest.config.coverage.istanbul.mts",
+    "coverage": "npx vitest run test/qrl -c ../../config/vitest.config.coverage.mts",
     "docs:build": "typedoc --options typedoc.mjs",
-    "examples": "tsx ../../scripts/examples-runner.ts -- statemanager",
-    "examples:build": "npx embedme README.md",
     "lint": "npm run biome && eslint  --config ./eslint.config.mjs .",
     "lint:fix": "npm run biome:fix && eslint  --fix --config ./eslint.config.mjs .",
     "prepublishOnly": "../../config/cli/prepublish.sh && npm run test:node",
-    "test": "npm run test:node && npm run test:browser",
-    "test:browser": "npx vitest run --config=./vitest.config.browser.mts",
-    "test:node": "npx vitest run -c ../../config/vitest.config.mts",
+    "test": "npm run test:qrl",
+    "test:node": "npm run test:qrl",
+    "test:qrl": "npx vitest run test/qrl -c ../../config/vitest.config.mts",
     "tsc": "../../config/cli/ts-compile.sh"
   },
   "dependencies": {
-    "@ethereumjs/binarytree": "^10.1.2",
-    "@ethereumjs/common": "^10.1.2",
-    "@ethereumjs/rlp": "^10.1.2",
-    "@ethereumjs/mpt": "^10.1.2",
-    "@ethereumjs/util": "^10.1.2",
-    "@js-sdsl/ordered-map": "^4.4.2",
     "@noble/hashes": "^2.0.1",
-    "debug": "^4.4.0",
-    "lru-cache": "11.0.2"
+    "@theqrl/mpt": "^10.1.2",
+    "@theqrl/rlp": "^10.1.2",
+    "@theqrl/util": "^10.1.2"
   },
-  "devDependencies": {
-    "@ethereumjs/block": "^10.1.2",
-    "@ethereumjs/genesis": "^10.1.2",
-    "@types/debug": "^4.1.12",
-    "micro-eth-signer": "0.15.0"
-  }
+  "devDependencies": {}
 }

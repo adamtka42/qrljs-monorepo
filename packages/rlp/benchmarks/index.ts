@@ -1,5 +1,5 @@
 import Benchmark from 'benchmark'
-import { decode, encode } from '../dist/cjs/index.js'
+import { decode, encode } from '../src/index.ts'
 
 const suite = new Benchmark.Suite()
 
@@ -19,4 +19,8 @@ for (const { type, data } of testData) {
   suite.add(`decode - ${type}`, () => decode(encoded))
 }
 
-suite.on('cycle', (event: Event) => console.log(String(event.target))).run()
+suite.on('cycle', (event: Event) => {
+  process.stdout.write(`${String(event.target)}\n`)
+})
+
+suite.run()

@@ -5,11 +5,10 @@
     "outDir": "dist/cjs",
     "composite": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/index.ts", "src/qrl/**/*.ts"],
   "references": [
-    { "path": "../common/tsconfig.prod.cjs.json" },
-    { "path": "../mpt/tsconfig.prod.cjs.json" },
-    { "path": "../util/tsconfig.prod.cjs.json" },
-    { "path": "../binarytree/tsconfig.prod.cjs.json" }
+    {
+      "path": "../util/tsconfig.prod.cjs.json"
+    }
   ]
 }

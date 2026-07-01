@@ -5,10 +5,13 @@
     "outDir": "dist/cjs",
     "lib": ["dom"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/index.ts", "src/qrl/**/*.ts"],
   "references": [
-    { "path": "../common/tsconfig.prod.cjs.json" },
-    { "path": "../rlp/tsconfig.prod.cjs.json" },
-    { "path": "../util/tsconfig.prod.cjs.json" }
+    {
+      "path": "../rlp/tsconfig.prod.cjs.json"
+    },
+    {
+      "path": "../util/tsconfig.prod.cjs.json"
+    }
   ]
 }
