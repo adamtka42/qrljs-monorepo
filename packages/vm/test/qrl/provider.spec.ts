@@ -321,6 +321,38 @@ describe('QRLLocalProvider', () => {
     )
   })
 
+  it('passes chain id, base fee, and gas price into qrl_call execution context', async () => {
+    const sender = address(1)
+    const contract = address(3)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      defaultContext: { chainId: 123n, baseFee: 7n, gasLimit: 100000n, noBaseFee: false },
+    })
+
+    await provider.chain.stateManager.putCode(
+      contract,
+      new Uint8Array([
+        0x46, 0x5f, 0x52, 0x48, 0x60, 0x40, 0x52, 0x3a, 0x60, 0x80, 0x52, 0x60, 0xc0, 0x5f, 0xf3,
+      ]),
+    )
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_call',
+        params: [
+          {
+            from: sender.toString(),
+            to: contract.toString(),
+            gas: '0x186a0',
+            maxFeePerGas: '0x14',
+            maxPriorityFeePerGas: '0x5',
+          },
+        ],
+      }),
+      `0x${'00'.repeat(63)}7b${'00'.repeat(63)}07${'00'.repeat(63)}0c`,
+    )
+  })
+
   it('estimates gas for transfers, calls, and contract creation without changing state', async () => {
     const sender = address(1)
     const receiver = address(2)
