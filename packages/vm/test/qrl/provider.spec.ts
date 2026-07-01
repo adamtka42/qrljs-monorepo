@@ -192,6 +192,40 @@ describe('QRLLocalProvider', () => {
     )
   })
 
+  it('returns sender information for queued pending transactions by hash', async () => {
+    const sender = address(1)
+    const receiver = address(2)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      automine: false,
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    const txHash = (await provider.request({
+      method: 'qrl_sendTransaction',
+      params: [
+        {
+          from: sender.toString(),
+          to: receiver.toString(),
+          gas: '0x5208',
+          maxFeePerGas: '0x0',
+          maxPriorityFeePerGas: '0x0',
+          value: '0x2a',
+        },
+      ],
+    })) as string
+
+    const tx = (await provider.request({
+      method: 'qrl_getTransactionByHash',
+      params: [txHash],
+    })) as { from?: string; to?: string; blockHash?: string; blockNumber?: string }
+
+    assert.strictEqual(tx.from, sender.toString())
+    assert.strictEqual(tx.to, receiver.toString())
+    assert.strictEqual(tx.blockHash, undefined)
+    assert.strictEqual(tx.blockNumber, undefined)
+  })
+
   it('supports code, storage, qrl_call, mining, snapshots, and revert', async () => {
     const sender = address(1)
     const contract = address(3)
@@ -422,6 +456,33 @@ describe('QRLLocalProvider', () => {
     )
   })
 
+  it('estimates gas with the pending block tag', async () => {
+    const sender = address(1)
+    const receiver = address(2)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      automine: false,
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    assert.strictEqual(
+      await provider.request({
+        method: 'qrl_estimateGas',
+        params: [
+          {
+            from: sender.toString(),
+            to: receiver.toString(),
+            value: '0x1',
+            maxFeePerGas: '0x0',
+            maxPriorityFeePerGas: '0x0',
+          },
+          'pending',
+        ],
+      }),
+      '0x5208',
+    )
+  })
+
   it('rejects gas estimation when the requested cap cannot execute the transaction', async () => {
     const sender = address(1)
     const receiver = address(2)
@@ -541,6 +602,48 @@ describe('QRLLocalProvider', () => {
       ).length,
       0,
     )
+  })
+
+  it('returns logs from the pending block range', async () => {
+    const sender = address(1)
+    const contract = address(3)
+    const provider = new qrl.QRLLocalProvider({
+      accounts: [{ address: sender, balance: 1000n }],
+      automine: false,
+      defaultContext: { chainId: 1n, gasLimit: 100000n, noBaseFee: true },
+    })
+
+    await provider.chain.stateManager.putCode(contract, logCode(0x7b))
+    await provider.request({
+      method: 'qrl_sendTransaction',
+      params: [
+        {
+          from: sender.toString(),
+          to: contract.toString(),
+          gas: '0x186a0',
+          maxFeePerGas: '0x0',
+          maxPriorityFeePerGas: '0x0',
+        },
+      ],
+    })
+
+    const logs = (await provider.request({
+      method: 'qrl_getLogs',
+      params: [
+        {
+          fromBlock: 'pending',
+          toBlock: 'pending',
+          address: contract.toString(),
+          topics: [topicHex(0x7b)],
+        },
+      ],
+    })) as Array<{ address: string; topics: string[]; data: string; blockNumber: string }>
+
+    assert.strictEqual(logs.length, 1)
+    assert.strictEqual(logs[0].address, contract.toString())
+    assert.strictEqual(logs[0].topics[0], topicHex(0x7b))
+    assert.strictEqual(logs[0].data, `0x${'00'.repeat(63)}2a`)
+    assert.strictEqual(logs[0].blockNumber, '0x1')
   })
 
   it('reverts only its own qrl_call checkpoint on execution errors', async () => {

@@ -41,7 +41,13 @@ export interface QRLMineBlockOptions {
 
 interface PendingQRLTransaction {
   tx: txQrl.QRLDynamicFeeTransaction
+  sender: qrl.QRLAddress
   result: QRLRunTxResult
+}
+
+export interface QRLIndexedTransaction {
+  tx: txQrl.QRLDynamicFeeTransaction
+  sender: qrl.QRLAddress
 }
 
 export class QRLLocalChain {
@@ -57,7 +63,7 @@ export class QRLLocalChain {
   private nextSnapshotId = 1n
   private blocksByNumber = new Map<string, blockQrl.QRLBlock>()
   private blocksByHash = new Map<string, blockQrl.QRLBlock>()
-  private transactionsByHash = new Map<string, txQrl.QRLDynamicFeeTransaction>()
+  private transactionsByHash = new Map<string, QRLIndexedTransaction>()
   private receiptsByTxHash = new Map<string, blockQrl.QRLReceipt>()
   private pending: PendingQRLTransaction[] = []
   private snapshots = new Map<string, QRLChainSnapshot>()
@@ -90,6 +96,10 @@ export class QRLLocalChain {
   }
 
   public getTransaction(hash: Uint8Array): txQrl.QRLDynamicFeeTransaction | undefined {
+    return this.transactionsByHash.get(qrlLookupKey(hash))?.tx
+  }
+
+  public getIndexedTransaction(hash: Uint8Array): QRLIndexedTransaction | undefined {
     return this.transactionsByHash.get(qrlLookupKey(hash))
   }
 
@@ -119,7 +129,7 @@ export class QRLLocalChain {
       evm,
       context: options.context ?? nextBlockContext(this.context, this.getLatestBlock()),
     })
-    const pending = { tx: options.tx, result: runTxResult }
+    const pending = { tx: options.tx, sender: runTxResult.sender, result: runTxResult }
 
     if (shouldMine) {
       const block = await this.mineBlockWithPending([pending], {}, this.stateManager)
@@ -132,7 +142,10 @@ export class QRLLocalChain {
     }
 
     this.pending.push(pending)
-    this.transactionsByHash.set(qrlLookupKey(options.tx.hash()), options.tx)
+    this.transactionsByHash.set(qrlLookupKey(options.tx.hash()), {
+      tx: options.tx,
+      sender: runTxResult.sender,
+    })
     return {
       runTxResult,
       transaction: options.tx,
@@ -168,6 +181,7 @@ export class QRLLocalChain {
       transactionsByHash: cloneQRLMap(this.transactionsByHash),
       receiptsByTxHash: cloneQRLMap(this.receiptsByTxHash),
       pendingTransactions: this.pending.map((entry) => entry.tx),
+      pendingSenders: this.pending.map((entry) => entry.sender),
       pendingResults: this.pending.map((entry) => entry.result),
     })
     return id
@@ -194,6 +208,7 @@ export class QRLLocalChain {
     this.receiptsByTxHash = cloneQRLMap(snapshot.receiptsByTxHash)
     this.pending = snapshot.pendingTransactions.map((tx, index) => ({
       tx,
+      sender: snapshot.pendingSenders[index],
       result: snapshot.pendingResults[index],
     }))
 
@@ -215,7 +230,7 @@ export class QRLLocalChain {
     this.indexBlock(block)
     for (const [index, entry] of pending.entries()) {
       const txHash = qrlLookupKey(entry.tx.hash())
-      this.transactionsByHash.set(txHash, entry.tx)
+      this.transactionsByHash.set(txHash, { tx: entry.tx, sender: entry.sender })
       this.receiptsByTxHash.set(txHash, block.receipts[index])
     }
     return block

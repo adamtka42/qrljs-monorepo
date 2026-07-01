@@ -147,7 +147,11 @@ export class QRLLocalProvider {
   private async estimateGas(params: unknown[]): Promise<string> {
     expectParamRange('qrl_estimateGas', params, 1, 2)
     const request = parseTransactionRequest(params[0])
-    assertLatestBlockTag(params[1])
+    const stateManager = this.resolveStateManager(params[1], true)
+    const evm =
+      stateManager === this.chain.stateManager
+        ? this.chain.evm
+        : new evmQrl.QRLEVM({ stateManager })
 
     const sender = parseAddress(request.from)
     const requestedGas = parseOptionalGasLimit(request)
@@ -159,7 +163,7 @@ export class QRLLocalProvider {
       throw new QRLProviderError(-32000, 'QRL gas estimation failed: gas limit is zero')
     }
 
-    if (!(await this.canExecuteWithGas(request, sender, upperBound))) {
+    if (!(await this.canExecuteWithGas(request, sender, upperBound, stateManager, evm))) {
       throw new QRLProviderError(-32000, 'QRL gas estimation failed')
     }
 
@@ -167,7 +171,7 @@ export class QRLLocalProvider {
     let high = upperBound
     while (low + 1n < high) {
       const mid = (low + high) / 2n
-      if (await this.canExecuteWithGas(request, sender, mid)) {
+      if (await this.canExecuteWithGas(request, sender, mid, stateManager, evm)) {
         high = mid
       } else {
         low = mid
@@ -181,18 +185,21 @@ export class QRLLocalProvider {
     request: QRLProviderTransactionRequest,
     sender: qrl.QRLAddress,
     gasLimit: bigint,
+    stateManager: stateQrl.QRLStateManager,
+    evm: evmQrl.QRLEVM,
   ): Promise<boolean> {
     const tx = await this.createTransaction(
       { ...request, gas: gasLimit, gasLimit: undefined },
       sender,
+      stateManager,
     )
-    await this.chain.stateManager.checkpoint()
+    await stateManager.checkpoint()
     try {
       const result = await runQRLTx({
         tx,
         sender,
-        stateManager: this.chain.stateManager,
-        evm: this.chain.evm,
+        stateManager,
+        evm,
         context: this.nextExecutionContext(),
         skipBalance: true,
         skipNonce: true,
@@ -201,7 +208,7 @@ export class QRLLocalProvider {
     } catch {
       return false
     } finally {
-      await this.chain.stateManager.revert()
+      await stateManager.revert()
     }
   }
 
@@ -284,8 +291,8 @@ export class QRLLocalProvider {
   private async getTransactionByHash(params: unknown[]): Promise<unknown> {
     expectParamCount('qrl_getTransactionByHash', params, 1)
     const hash = parseHash(params[0])
-    const tx = this.chain.getTransaction(hash)
-    if (tx === undefined) {
+    const indexed = this.chain.getIndexedTransaction(hash)
+    if (indexed === undefined) {
       return null
     }
     const receipt = this.chain.getReceipt(hash)
@@ -293,7 +300,12 @@ export class QRLLocalProvider {
       receipt?.blockNumber === undefined
         ? undefined
         : this.chain.getBlockByNumber(receipt.blockNumber)
-    return formatQRLTransaction(tx, block, receipt?.transactionIndex, receipt?.from)
+    return formatQRLTransaction(
+      indexed.tx,
+      block,
+      receipt?.transactionIndex,
+      receipt?.from ?? indexed.sender,
+    )
   }
 
   private async getTransactionReceipt(params: unknown[]): Promise<unknown> {
@@ -316,16 +328,26 @@ export class QRLLocalProvider {
 
     const latest = this.chain.getBlockNumber()
     const fromBlock = resolveLogFilterBlock(filter.fromBlock, 0n, latest)
-    const toBlock = resolveLogFilterBlock(filter.toBlock, latest, latest)
-    if (fromBlock > toBlock) {
+    const toBlock =
+      filter.toBlock === undefined && filter.fromBlock === 'pending'
+        ? { number: latest + 1n, includesPending: true }
+        : resolveLogFilterBlock(filter.toBlock, latest, latest)
+    if (fromBlock.number > toBlock.number) {
       return []
     }
 
-    for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
+    for (let blockNumber = fromBlock.number; blockNumber <= toBlock.number; blockNumber++) {
+      if (blockNumber > latest) {
+        break
+      }
       const block = this.chain.getBlockByNumber(blockNumber)
       if (block !== undefined) {
         logs.push(...collectMatchingLogs(block, filter))
       }
+    }
+
+    if (toBlock.includesPending && fromBlock.number <= latest + 1n) {
+      logs.push(...collectMatchingLogs(await this.chain.getPendingBlock(), filter))
     }
 
     return logs.map((log) => formatQRLLog(log))
@@ -486,17 +508,29 @@ function parseLogTopic(value: unknown): Uint8Array {
   return parseFixedBytes('QRL log topic', value, 64)
 }
 
-function resolveLogFilterBlock(value: unknown, fallback: bigint, latest: bigint): bigint {
+interface ResolvedLogFilterBlock {
+  number: bigint
+  includesPending: boolean
+}
+
+function resolveLogFilterBlock(
+  value: unknown,
+  fallback: bigint,
+  latest: bigint,
+): ResolvedLogFilterBlock {
   if (value === undefined) {
-    return fallback
+    return { number: fallback, includesPending: false }
   }
   if (value === 'latest') {
-    return latest
+    return { number: latest, includesPending: false }
+  }
+  if (value === 'pending') {
+    return { number: latest + 1n, includesPending: true }
   }
   if (value === 'earliest') {
-    return 0n
+    return { number: 0n, includesPending: false }
   }
-  return parseQuantity(value, 'log filter block')
+  return { number: parseQuantity(value, 'log filter block'), includesPending: false }
 }
 
 function collectMatchingLogs(block: blockQrl.QRLBlock, filter: QRLLogFilter): blockQrl.QRLLog[] {
